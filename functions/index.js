@@ -25,15 +25,21 @@ const tabNames = {
 exports.onPostCreated = onValueCreated(
     {
       ref: "/posts/{tabName}/{postId}",
+      region: "us-central1",
     },
     async (event) => {
+      console.log("📝 새 글 작성 감지:", event.params);
       const post = event.data.val();
       const {tabName, postId} = event.params;
 
       // 작성자 본인은 제외
       const author = post.author;
-      if (!author) return null;
+      if (!author) {
+        console.log("⚠️ 작성자 정보가 없습니다.");
+        return null;
+      }
 
+      console.log(`작성자: ${author}, 탭: ${tabName}, 글ID: ${postId}`);
       try {
         // 모든 사용자의 FCM 토큰 가져오기
         const usersSnapshot = await admin
@@ -121,15 +127,21 @@ exports.onPostCreated = onValueCreated(
 exports.onEventCreated = onValueCreated(
     {
       ref: "/events/{eventId}",
+      region: "us-central1",
     },
     async (event) => {
+      console.log("📅 새 일정 추가 감지:", event.params);
       const eventData = event.data.val();
       const {eventId} = event.params;
 
       // 작성자 본인은 제외
       const author = eventData.author;
-      if (!author) return null;
+      if (!author) {
+        console.log("⚠️ 작성자 정보가 없습니다.");
+        return null;
+      }
 
+      console.log(`작성자: ${author}, 일정ID: ${eventId}`);
       try {
         // 모든 사용자의 FCM 토큰 가져오기
         const usersSnapshot = await admin
