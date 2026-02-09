@@ -97,14 +97,21 @@ self.addEventListener('notificationclick', (event) => {
         // 이미 열려있는 창이 있으면 포커스
         for (let i = 0; i < clientList.length; i++) {
           const client = clientList[i];
-          if (client.url === '/' && 'focus' in client) {
+          if (client.url.includes('/bamboo/') && 'focus' in client) {
+            if (event.notification.data && event.notification.data.tab) {
+              client.navigate(`/bamboo/index.html#${event.notification.data.tab}`);
+            }
             return client.focus();
           }
         }
         // 없으면 새 창 열기
         if (clients.openWindow) {
           const basePath = self.location.pathname.split('/sw.js')[0] || '/bamboo';
-          return clients.openWindow(basePath + '/');
+          let url = basePath + '/';
+          if (event.notification.data && event.notification.data.tab) {
+            url += `index.html#${event.notification.data.tab}`;
+          }
+          return clients.openWindow(url);
         }
       })
   );
