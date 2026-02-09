@@ -56,24 +56,45 @@ self.addEventListener('push', (event) => {
     body: '새로운 알림이 있습니다.',
     icon: iconPath,
     badge: iconPath,
-    tag: 'bamboo-notification'
+    tag: 'bamboo-notification',
+    data: {}
   };
   
   if (event.data) {
     try {
-      const data = event.data.json();
-      notificationData = {
-        title: data.title || notificationData.title,
-        body: data.body || notificationData.body,
-        icon: data.icon || notificationData.icon,
-        badge: data.badge || notificationData.badge,
-        tag: data.tag || notificationData.tag,
-        data: data.data || {}
-      };
+      const payload = event.data.json();
+      console.log('푸시 페이로드:', payload);
+      
+      // Firebase Messaging 형식 처리
+      if (payload.notification) {
+        notificationData = {
+          title: payload.notification.title || notificationData.title,
+          body: payload.notification.body || notificationData.body,
+          icon: payload.notification.icon || iconPath,
+          badge: payload.notification.badge || iconPath,
+          tag: payload.data?.type || 'bamboo-notification',
+          data: payload.data || {}
+        };
+      } else if (payload.title || payload.body) {
+        // 직접 notification 필드가 있는 경우
+        notificationData = {
+          title: payload.title || notificationData.title,
+          body: payload.body || notificationData.body,
+          icon: payload.icon || iconPath,
+          badge: payload.badge || iconPath,
+          tag: payload.tag || 'bamboo-notification',
+          data: payload.data || {}
+        };
+      } else {
+        notificationData.body = event.data.text() || notificationData.body;
+      }
     } catch (e) {
-      notificationData.body = event.data.text();
+      console.error('푸시 데이터 파싱 오류:', e);
+      notificationData.body = event.data.text() || notificationData.body;
     }
   }
+  
+  console.log('알림 표시:', notificationData);
   
   event.waitUntil(
     self.registration.showNotification(notificationData.title, {
@@ -81,7 +102,9 @@ self.addEventListener('push', (event) => {
       icon: notificationData.icon,
       badge: notificationData.badge,
       tag: notificationData.tag,
-      data: notificationData.data
+      data: notificationData.data,
+      requireInteraction: false,
+      silent: false
     })
   );
 });

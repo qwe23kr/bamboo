@@ -54,17 +54,29 @@ exports.onPostCreated = onValueCreated(
 
         // 각 사용자에게 알림 메시지 생성
         for (const [userId, user] of Object.entries(users)) {
-          // 본인, 승인되지 않은 사용자, FCM 토큰이 없는 사용자는 제외
+          // 본인 제외
           if (user.name === author) {
             console.log(`작성자 본인 제외: ${user.name}`);
             continue;
           }
-          if (!user.approved) {
-            console.log(`승인되지 않은 사용자 제외: ${user.name} (userId: ${userId})`);
+
+          // admin 사용자는 자동으로 승인된 것으로 처리
+          const isApproved = user.approved === true ||
+            userId === "admin" ||
+            user.name === "admin";
+          if (!isApproved) {
+            const userName = user.name || "이름 없음";
+            console.log(
+                `승인되지 않은 사용자 제외: ${userName} (userId: ${userId})`,
+            );
             continue;
           }
+
           if (!user.fcmToken) {
-            console.log(`FCM 토큰이 없는 사용자 제외: ${user.name} (userId: ${userId})`);
+            const userName = user.name || "이름 없음";
+            console.log(
+                `FCM 토큰이 없는 사용자 제외: ${userName} (userId: ${userId})`,
+            );
             continue;
           }
 
@@ -81,8 +93,14 @@ exports.onPostCreated = onValueCreated(
             },
             webpush: {
               notification: {
+                title: "새 글이 등록되었습니다",
+                body: `${author}님이 ${tabNames[tabName] || tabName}에 새 글을 작성했습니다.`,
                 icon: "/bamboo/icon-192.png",
                 badge: "/bamboo/icon-192.png",
+                requireInteraction: false,
+              },
+              fcmOptions: {
+                link: `/bamboo/index.html#${tabName}`,
               },
             },
           });
@@ -156,17 +174,29 @@ exports.onEventCreated = onValueCreated(
 
         // 각 사용자에게 알림 메시지 생성
         for (const [userId, user] of Object.entries(users)) {
-          // 본인, 승인되지 않은 사용자, FCM 토큰이 없는 사용자는 제외
+          // 본인 제외
           if (user.name === author) {
             console.log(`작성자 본인 제외: ${user.name}`);
             continue;
           }
-          if (!user.approved) {
-            console.log(`승인되지 않은 사용자 제외: ${user.name} (userId: ${userId})`);
+
+          // admin 사용자는 자동으로 승인된 것으로 처리
+          const isApproved = user.approved === true ||
+            userId === "admin" ||
+            user.name === "admin";
+          if (!isApproved) {
+            const userName = user.name || "이름 없음";
+            console.log(
+                `승인되지 않은 사용자 제외: ${userName} (userId: ${userId})`,
+            );
             continue;
           }
+
           if (!user.fcmToken) {
-            console.log(`FCM 토큰이 없는 사용자 제외: ${user.name} (userId: ${userId})`);
+            const userName = user.name || "이름 없음";
+            console.log(
+                `FCM 토큰이 없는 사용자 제외: ${userName} (userId: ${userId})`,
+            );
             continue;
           }
 
