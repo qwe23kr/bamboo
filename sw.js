@@ -50,14 +50,14 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('push', (event) => {
   console.log('푸시 알림 수신:', event);
   
-  let             const iconPath = basePath + '/icon-192.png';
-            notificationData = {
-                title: '밤부',
-                body: '새로운 알림이 있습니다.',
-                icon: iconPath,
-                badge: iconPath,
-                tag: 'bamboo-notification'
-            };
+  const iconPath = basePath + '/icon-192.png';
+  let notificationData = {
+    title: '밤부',
+    body: '새로운 알림이 있습니다.',
+    icon: iconPath,
+    badge: iconPath,
+    tag: 'bamboo-notification'
+  };
   
   if (event.data) {
     try {

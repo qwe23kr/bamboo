@@ -3059,8 +3059,24 @@
                     
                     // FCM 토큰 가져오기
                     const messaging = getMessaging();
+                    
+                    // Service Worker 등록 확인
+                    let serviceWorkerRegistration = null;
+                    if ('serviceWorker' in navigator) {
+                        try {
+                            const swPath = window.location.pathname.includes('/bamboo/') 
+                                ? '/bamboo/sw.js' 
+                                : '/sw.js';
+                            serviceWorkerRegistration = await navigator.serviceWorker.ready;
+                            console.log('✅ Service Worker 준비 완료');
+                        } catch (error) {
+                            console.error('Service Worker 준비 실패:', error);
+                        }
+                    }
+                    
                     const token = await getToken(messaging, {
-                        vapidKey: 'BHtWcI-zBH7NzVa1o3AFdTA-5pdYmhIizHNNCHoVGPftbRMh5iuarq3-7uxHNDffF2Z67ZGFMC9lZBuE9SC0agk'
+                        vapidKey: 'BHtWcI-zBH7NzVa1o3AFdTA-5pdYmhIizHNNCHoVGPftbRMh5iuarq3-7uxHNDffF2Z67ZGFMC9lZBuE9SC0agk',
+                        serviceWorkerRegistration: serviceWorkerRegistration
                     });
                     
                     if (token) {
