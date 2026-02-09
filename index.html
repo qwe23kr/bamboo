@@ -2866,15 +2866,32 @@
                 return;
             }
             
-            const permission = await Notification.requestPermission();
+            // 현재 권한 상태 확인
+            let permission = Notification.permission;
+            
+            // 권한이 차단된 경우
+            if (permission === 'denied') {
+                alert('알림 권한이 차단되어 있습니다.\n\n브라우저 설정에서 알림을 허용해주세요:\n\n1. 주소창 왼쪽 자물쇠 아이콘(🔒) 클릭\n2. "알림" 설정에서 "허용" 선택\n3. 페이지를 새로고침하세요.');
+                return;
+            }
+            
+            // 권한 요청
+            if (permission === 'default') {
+                permission = await Notification.requestPermission();
+            }
+            
             if (permission !== 'granted') {
                 alert('알림 권한이 필요합니다. 브라우저 설정에서 알림을 허용해주세요.');
                 return;
             }
             
-            alert('FCM 토큰을 다시 저장합니다...');
-            await initializePushNotifications();
-            alert('FCM 토큰 저장이 완료되었습니다. 브라우저 콘솔(F12)에서 확인하세요.');
+            // FCM 토큰 초기화 (권한은 이미 있으므로 요청하지 않음)
+            const success = await initializePushNotifications(false);
+            if (success) {
+                alert('✅ FCM 토큰 저장이 완료되었습니다!\n\n브라우저 콘솔(F12)에서 확인하세요.');
+            } else {
+                alert('FCM 토큰 저장에 실패했습니다. 브라우저 콘솔(F12)에서 오류를 확인하세요.');
+            }
         };
         
         // 로그아웃
@@ -3015,18 +3032,28 @@
         }
         
         // 푸시 알림 권한 요청 및 FCM 초기화
-        async function initializePushNotifications() {
+        async function initializePushNotifications(requestPermission = false) {
             if (!('Notification' in window)) {
                 console.log('이 브라우저는 알림을 지원하지 않습니다.');
-                return;
+                return false;
             }
             
             try {
-                // Firebase Cloud Messaging 가져오기
-                const { getMessaging, getToken, onMessage } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js');
+                // 현재 권한 상태 확인
+                let permission = Notification.permission;
                 
-                // 알림 권한 요청
-                const permission = await Notification.requestPermission();
+                // 권한이 차단된 경우
+                if (permission === 'denied') {
+                    console.warn('⚠️ 알림 권한이 차단되었습니다.');
+                    alert('알림 권한이 차단되어 있습니다.\n\n브라우저 설정에서 알림을 허용해주세요:\n1. 주소창 왼쪽 자물쇠 아이콘 클릭\n2. "알림" 설정에서 "허용" 선택\n3. 페이지를 새로고침하세요.');
+                    return false;
+                }
+                
+                // 권한 요청이 필요한 경우에만 요청 (사용자 제스처가 있을 때만)
+                if (permission === 'default' && requestPermission) {
+                    permission = await Notification.requestPermission();
+                }
+                
                 if (permission === 'granted') {
                     console.log('알림 권한이 허용되었습니다.');
                     
@@ -3088,11 +3115,21 @@
                             });
                         }
                     });
+                    
+                    return true; // 성공
+                } else if (permission === 'default') {
+                    console.log('알림 권한이 아직 요청되지 않았습니다. "🔔 알림 설정" 버튼을 클릭해주세요.');
+                    return false;
                 } else {
                     console.log('알림 권한이 거부되었습니다.');
+                    return false;
                 }
             } catch (error) {
                 console.error('푸시 알림 초기화 오류:', error);
+                if (error.code === 'messaging/permission-blocked') {
+                    alert('알림 권한이 차단되어 있습니다.\n\n브라우저 설정에서 알림을 허용해주세요:\n1. 주소창 왼쪽 자물쇠 아이콘 클릭\n2. "알림" 설정에서 "허용" 선택\n3. 페이지를 새로고침하세요.');
+                }
+                return false;
             }
         }
         
@@ -3165,34 +3202,44 @@
         }
         
         // 로그인 후 푸시 알림 초기화
-        async function initNotifications() {
+        async function initNotifications(requestPermission = false) {
             const userId = localStorage.getItem('bamboo_userId');
-            if (userId) {
-                // FCM 토큰이 있는지 확인
-                const tokenRef = ref(database, `users/${userId}/fcmToken`);
-                const tokenSnapshot = await get(tokenRef);
-                
-                if (!tokenSnapshot.exists() || !tokenSnapshot.val()) {
-                    console.log('🔄 FCM 토큰이 없어서 다시 초기화합니다...');
-                    await initializePushNotifications();
-                } else {
-                    console.log('✅ FCM 토큰이 이미 저장되어 있습니다.');
-                }
-                
-                setupNotificationListener();
+            if (!userId) return;
+            
+            // 권한 상태 확인
+            const currentPermission = Notification.permission;
+            
+            // 권한이 차단된 경우 자동 초기화하지 않음
+            if (currentPermission === 'denied') {
+                console.log('⚠️ 알림 권한이 차단되어 있습니다. "🔔 알림 설정" 버튼을 사용하거나 브라우저 설정에서 허용해주세요.');
+                return;
             }
+            
+            // FCM 토큰이 있는지 확인
+            const tokenRef = ref(database, `users/${userId}/fcmToken`);
+            const tokenSnapshot = await get(tokenRef);
+            
+            if (!tokenSnapshot.exists() || !tokenSnapshot.val()) {
+                // 권한이 이미 허용된 경우에만 자동 초기화
+                if (currentPermission === 'granted') {
+                    console.log('🔄 FCM 토큰이 없어서 다시 초기화합니다...');
+                    await initializePushNotifications(false); // 권한은 이미 있으므로 요청하지 않음
+                } else {
+                    console.log('ℹ️ FCM 토큰이 없습니다. "🔔 알림 설정" 버튼을 클릭하여 알림을 활성화하세요.');
+                }
+            } else {
+                console.log('✅ FCM 토큰이 이미 저장되어 있습니다.');
+            }
+            
+            setupNotificationListener();
         }
         
-        // 즉시 실행 및 3초 후 재시도
-        initNotifications();
-        setTimeout(() => {
-            initNotifications();
-        }, 3000);
-        
-        // 페이지 포커스 시에도 재시도
-        window.addEventListener('focus', () => {
-            initNotifications();
-        });
+        // 권한이 이미 허용된 경우에만 자동 초기화
+        if (Notification.permission === 'granted') {
+            initNotifications(false);
+        } else {
+            console.log('ℹ️ 알림 권한이 없습니다. "🔔 알림 설정" 버튼을 클릭하여 활성화하세요.');
+        }
         
     </script>
 </body>
