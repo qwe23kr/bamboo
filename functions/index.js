@@ -47,13 +47,18 @@ exports.onPostCreated = onValueCreated(
         const messages = [];
 
         // 각 사용자에게 알림 메시지 생성
-        for (const [, user] of Object.entries(users)) {
+        for (const [userId, user] of Object.entries(users)) {
           // 본인, 승인되지 않은 사용자, FCM 토큰이 없는 사용자는 제외
-          if (
-            user.name === author ||
-            !user.approved ||
-            !user.fcmToken
-          ) {
+          if (user.name === author) {
+            console.log(`작성자 본인 제외: ${user.name}`);
+            continue;
+          }
+          if (!user.approved) {
+            console.log(`승인되지 않은 사용자 제외: ${user.name} (userId: ${userId})`);
+            continue;
+          }
+          if (!user.fcmToken) {
+            console.log(`FCM 토큰이 없는 사용자 제외: ${user.name} (userId: ${userId})`);
             continue;
           }
 
@@ -79,12 +84,23 @@ exports.onPostCreated = onValueCreated(
 
         // 알림 전송 (100개씩 배치로 전송)
         if (messages.length > 0) {
+          console.log(`총 ${messages.length}명에게 알림 전송 시작`);
           const batchSize = 100;
           for (let i = 0; i < messages.length; i += batchSize) {
             const batch = messages.slice(i, i + batchSize);
-            await admin.messaging().sendEach(batch);
+            const result = await admin.messaging().sendEach(batch);
+            console.log(`배치 ${i / batchSize + 1} 전송 완료: 성공 ${result.successCount}개, 실패 ${result.failureCount}개`);
+            if (result.failureCount > 0) {
+              result.responses.forEach((resp, idx) => {
+                if (!resp.success) {
+                  console.error(`알림 전송 실패 (인덱스 ${idx}):`, resp.error);
+                }
+              });
+            }
           }
-          console.log(`${messages.length}명에게 알림 전송 완료`);
+          console.log(`✅ 총 ${messages.length}명에게 알림 전송 완료`);
+        } else {
+          console.log('⚠️ 알림을 받을 사용자가 없습니다.');
         }
 
         return null;
@@ -123,13 +139,18 @@ exports.onEventCreated = onValueCreated(
         const messages = [];
 
         // 각 사용자에게 알림 메시지 생성
-        for (const [, user] of Object.entries(users)) {
+        for (const [userId, user] of Object.entries(users)) {
           // 본인, 승인되지 않은 사용자, FCM 토큰이 없는 사용자는 제외
-          if (
-            user.name === author ||
-            !user.approved ||
-            !user.fcmToken
-          ) {
+          if (user.name === author) {
+            console.log(`작성자 본인 제외: ${user.name}`);
+            continue;
+          }
+          if (!user.approved) {
+            console.log(`승인되지 않은 사용자 제외: ${user.name} (userId: ${userId})`);
+            continue;
+          }
+          if (!user.fcmToken) {
+            console.log(`FCM 토큰이 없는 사용자 제외: ${user.name} (userId: ${userId})`);
             continue;
           }
 
@@ -154,12 +175,23 @@ exports.onEventCreated = onValueCreated(
 
         // 알림 전송 (100개씩 배치로 전송)
         if (messages.length > 0) {
+          console.log(`총 ${messages.length}명에게 알림 전송 시작`);
           const batchSize = 100;
           for (let i = 0; i < messages.length; i += batchSize) {
             const batch = messages.slice(i, i + batchSize);
-            await admin.messaging().sendEach(batch);
+            const result = await admin.messaging().sendEach(batch);
+            console.log(`배치 ${i / batchSize + 1} 전송 완료: 성공 ${result.successCount}개, 실패 ${result.failureCount}개`);
+            if (result.failureCount > 0) {
+              result.responses.forEach((resp, idx) => {
+                if (!resp.success) {
+                  console.error(`알림 전송 실패 (인덱스 ${idx}):`, resp.error);
+                }
+              });
+            }
           }
-          console.log(`${messages.length}명에게 알림 전송 완료`);
+          console.log(`✅ 총 ${messages.length}명에게 알림 전송 완료`);
+        } else {
+          console.log('⚠️ 알림을 받을 사용자가 없습니다.');
         }
 
         return null;

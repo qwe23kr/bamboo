@@ -2741,13 +2741,26 @@
                     
                     if (token) {
                         console.log('FCM 토큰:', token);
-                        // 토큰을 Firebase Database에 저장 (선택사항)
+                        // 토큰을 Firebase Database에 저장
                         const userName = localStorage.getItem('bamboo_userName');
                         const userId = localStorage.getItem('bamboo_userId');
                         if (userName && userId) {
                             const tokenRef = ref(database, `users/${userId}/fcmToken`);
                             await set(tokenRef, token);
+                            console.log('FCM 토큰이 Firebase에 저장되었습니다.');
+                            
+                            // 저장 확인
+                            const savedToken = await get(tokenRef);
+                            if (savedToken.val() === token) {
+                                console.log('✅ FCM 토큰 저장 확인 완료');
+                            } else {
+                                console.error('❌ FCM 토큰 저장 실패');
+                            }
+                        } else {
+                            console.warn('⚠️ 사용자 정보가 없어 FCM 토큰을 저장할 수 없습니다.');
                         }
+                    } else {
+                        console.error('❌ FCM 토큰을 가져올 수 없습니다.');
                     }
                     
                     // 포그라운드 메시지 수신
