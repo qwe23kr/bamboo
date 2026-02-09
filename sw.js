@@ -1,9 +1,11 @@
 // Service Worker for PWA
 const CACHE_NAME = 'bamboo-v1';
+// GitHub Pages 경로에 맞게 동적으로 설정
+const basePath = self.location.pathname.split('/sw.js')[0] || '/bamboo';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/login.html'
+  basePath + '/',
+  basePath + '/index.html',
+  basePath + '/login.html'
 ];
 
 // 설치 이벤트
@@ -48,13 +50,14 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('push', (event) => {
   console.log('푸시 알림 수신:', event);
   
-  let notificationData = {
-    title: '밤부',
-    body: '새로운 알림이 있습니다.',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
-    tag: 'bamboo-notification'
-  };
+  let             const iconPath = basePath + '/icon-192.png';
+            notificationData = {
+                title: '밤부',
+                body: '새로운 알림이 있습니다.',
+                icon: iconPath,
+                badge: iconPath,
+                tag: 'bamboo-notification'
+            };
   
   if (event.data) {
     try {
@@ -100,7 +103,8 @@ self.addEventListener('notificationclick', (event) => {
         }
         // 없으면 새 창 열기
         if (clients.openWindow) {
-          return clients.openWindow('/');
+          const basePath = self.location.pathname.split('/sw.js')[0] || '/bamboo';
+          return clients.openWindow(basePath + '/');
         }
       })
   );

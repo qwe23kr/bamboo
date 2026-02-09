@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#ff69b4">
     <meta name="description" content="밤부 - 대나무숲 커뮤니티">
     <title>밤부 - 메인</title>
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/icon-192.png">
+    <link rel="manifest" href="/bamboo/manifest.json">
+    <link rel="apple-touch-icon" href="/bamboo/icon-192.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
@@ -2702,7 +2702,12 @@
         // PWA Service Worker 등록
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                // GitHub Pages 경로에 맞게 수정
+                const swPath = window.location.pathname.includes('/bamboo/') 
+                    ? '/bamboo/sw.js' 
+                    : '/sw.js';
+                
+                navigator.serviceWorker.register(swPath)
                     .then((registration) => {
                         console.log('Service Worker 등록 성공:', registration.scope);
                     })
@@ -2752,7 +2757,7 @@
                         if (Notification.permission === 'granted') {
                             new Notification(payload.notification.title, {
                                 body: payload.notification.body,
-                                icon: payload.notification.icon || '/icon-192.png'
+                                icon: payload.notification.icon || '/bamboo/icon-192.png'
                             });
                         }
                     });
@@ -2805,8 +2810,8 @@
                         if (Notification.permission === 'granted') {
                             const notification = new Notification(notif.title, {
                                 body: notif.body,
-                                icon: '/icon-192.png',
-                                badge: '/icon-192.png',
+                                icon: '/bamboo/icon-192.png',
+                                badge: '/bamboo/icon-192.png',
                                 tag: notif.type,
                                 data: {
                                     type: notif.type,

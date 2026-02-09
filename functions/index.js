@@ -68,12 +68,12 @@ exports.onPostCreated = onValueCreated(
               tab: tabName,
               postId: postId,
             },
-            webpush: {
-              notification: {
-                icon: "/icon-192.png",
-                badge: "/icon-192.png",
-              },
+          webpush: {
+            notification: {
+              icon: "/bamboo/icon-192.png",
+              badge: "/bamboo/icon-192.png",
             },
+          },
           });
         }
 
@@ -143,12 +143,12 @@ exports.onEventCreated = onValueCreated(
               type: "event",
               eventId: eventId,
             },
-            webpush: {
-              notification: {
-                icon: "/icon-192.png",
-                badge: "/icon-192.png",
-              },
+          webpush: {
+            notification: {
+              icon: "/bamboo/icon-192.png",
+              badge: "/bamboo/icon-192.png",
             },
+          },
           });
         }
 
