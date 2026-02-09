@@ -3183,8 +3183,10 @@
         // PWA 설치 이벤트 감지
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
+            // preventDefault를 호출하지 않으면 브라우저가 자동으로 설치 배너를 표시합니다
+            // 사용자가 설치 버튼을 클릭할 때까지 프롬프트를 보류하려면 아래 주석을 해제하세요
+            // e.preventDefault();
+            // deferredPrompt = e;
         });
         
         // PWA 설치 완료 이벤트
