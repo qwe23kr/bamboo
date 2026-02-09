@@ -1759,7 +1759,6 @@
                 renderCalendar();
                 alert('일정이 추가되었습니다!');
             } catch (error) {
-                console.error('일정 추가 오류:', error);
                 alert('일정 추가에 실패했습니다.');
             }
         });
@@ -1776,7 +1775,6 @@
                 renderCalendar();
                 alert('일정이 삭제되었습니다.');
             } catch (error) {
-                console.error('일정 삭제 오류:', error);
                 alert('일정 삭제에 실패했습니다.');
             }
         };
@@ -1905,7 +1903,6 @@
             const listenerKey = `${tabName}-${postId}`;
             const containerId = `comments-${tabName}-${postId}`;
             
-            console.log('댓글 로드 시작:', { postId, tabName, containerId });
             
             // 기존 리스너가 있으면 제거 (off 함수 사용)
             if (commentListeners.has(listenerKey)) {
@@ -1919,7 +1916,6 @@
             const renderComments = (snapshot) => {
                 const commentsContainer = document.getElementById(containerId);
                 if (!commentsContainer) {
-                    console.warn('댓글 컨테이너를 찾을 수 없습니다:', containerId);
                     // DOM이 준비될 때까지 기다렸다가 다시 시도
                     setTimeout(() => {
                         renderComments(snapshot);
@@ -1930,36 +1926,30 @@
                 commentsContainer.innerHTML = '';
                 
                 if (!snapshot.exists()) {
-                    console.log('댓글이 없습니다.');
                     return;
                 }
                 
                 const comments = snapshot.val();
-                console.log('댓글 데이터 수신:', comments);
                 
                 const commentsArray = Object.entries(comments).sort((a, b) => {
                     return new Date(a[1].createdAt) - new Date(b[1].createdAt);
                 });
                 
-                console.log(`댓글 ${commentsArray.length}개를 표시합니다.`);
                 
                 commentsArray.forEach(([commentId, comment]) => {
                     try {
                         const commentElement = createCommentElement(comment, commentId, postId, tabName);
                         commentsContainer.appendChild(commentElement);
                     } catch (error) {
-                        console.error('댓글 요소 생성 오류:', error, comment);
                     }
                 });
                 
-                console.log(`${commentsArray.length}개의 댓글이 표시되었습니다.`);
             };
             
             // onValue는 unsubscribe 함수를 반환합니다
             const unsubscribe = onValue(commentsRef, (snapshot) => {
                 renderComments(snapshot);
             }, (error) => {
-                console.error('댓글 로드 오류:', error);
             });
             
             commentListeners.set(listenerKey, unsubscribe);
@@ -2007,7 +1997,6 @@
             }
             
             if (!postId || !tabName) {
-                console.error('댓글 추가 오류: postId 또는 tabName이 없습니다.', { postId, tabName });
                 alert('댓글 작성에 실패했습니다. 페이지를 새로고침해주세요.');
                 return;
             }
@@ -2019,7 +2008,6 @@
                     return;
                 }
                 
-                console.log('댓글 추가 시도:', { postId, tabName, userName, content });
                 
                 const commentsRef = ref(database, `posts/${tabName}/${postId}/comments`);
                 const newCommentRef = push(commentsRef);
@@ -2030,11 +2018,9 @@
                     createdAt: new Date().toISOString()
                 };
                 
-                console.log('댓글 데이터 저장:', commentData);
                 
                 await set(newCommentRef, commentData);
                 
-                console.log('댓글 저장 완료');
                 inputElement.value = '';
                 
                 // 댓글 목록이 자동으로 업데이트되도록 onValue 리스너가 처리함
@@ -2042,14 +2028,11 @@
                 setTimeout(() => {
                     const commentsContainer = document.getElementById(`comments-${tabName}-${postId}`);
                     if (commentsContainer) {
-                        console.log('댓글 컨테이너 확인:', commentsContainer.id);
                     } else {
-                        console.error('댓글 컨테이너를 찾을 수 없습니다:', `comments-${tabName}-${postId}`);
                     }
                 }, 500);
             } catch (error) {
-                console.error('댓글 작성 오류:', error);
-                console.error('오류 상세:', {
+                // 댓글 작성 오류 처리
                     message: error.message,
                     code: error.code,
                     postId,
@@ -2094,7 +2077,6 @@
                 alert('댓글이 삭제되었습니다.');
                 
             } catch (error) {
-                console.error('댓글 삭제 오류:', error);
                 alert('댓글 삭제에 실패했습니다.');
             }
         };
@@ -2156,7 +2138,6 @@
                 const preview = document.getElementById('mediaPreview');
                 
                 if (!preview) {
-                    console.error('미리보기 컨테이너를 찾을 수 없습니다.');
                     return;
                 }
                 
@@ -2194,7 +2175,6 @@
                             URL.revokeObjectURL(previewUrl); // 이전 URL 해제
                             previewUrl = URL.createObjectURL(processedFile);
                         } catch (compressError) {
-                            console.error('이미지 압축 오류:', compressError);
                             // 압축 실패 시 원본 파일 사용
                         }
                     }
@@ -2220,10 +2200,8 @@
                 }
                 
                 if (window.selectedMedia.length > 0) {
-                    console.log(`${window.selectedMedia.length}개의 파일이 선택되었습니다.`);
                 }
             } catch (error) {
-                console.error('미디어 선택 처리 오류:', error);
                 alert('파일 선택 중 오류가 발생했습니다: ' + error.message);
             }
         };
@@ -2347,7 +2325,6 @@
                 modal.classList.add('show');
                 
             } catch (error) {
-                console.error('글 수정 오류:', error);
                 alert('글을 불러오는데 실패했습니다.');
             }
         };
@@ -2441,7 +2418,6 @@
                                 type: media.type
                             };
                         } catch (uploadError) {
-                            console.error('미디어 업로드 오류:', uploadError);
                             throw new Error(`파일 업로드 실패: ${uploadError.message}`);
                         }
                     });
@@ -2494,7 +2470,6 @@
                 alert(isEditMode ? '수정이 완료되었습니다!' : '작성이 완료되었습니다!');
                 
             } catch (error) {
-                console.error('글 작성/수정 오류:', error);
                 let errorMessage = isEditMode ? '수정에 실패했습니다.' : '작성에 실패했습니다.';
                 
                 if (error.message.includes('storage/unauthorized')) {
@@ -2553,7 +2528,6 @@
                                 await deleteObject(mediaStorageRef);
                             }
                         } catch (error) {
-                            console.error('미디어 파일 삭제 오류:', error);
                         }
                     }
                 }
@@ -2563,7 +2537,6 @@
                 alert('글이 삭제되었습니다.');
                 
             } catch (error) {
-                console.error('글 삭제 오류:', error);
                 alert('글 삭제에 실패했습니다.');
             }
         };
@@ -2620,7 +2593,6 @@
                     pendingUsersDiv.innerHTML = '<p style="text-align: center; padding: 20px;">대기 중인 사용자가 없습니다.</p>';
                 }
             } catch (error) {
-                console.error('사용자 목록 로드 오류:', error);
                 alert('사용자 목록을 불러오는데 실패했습니다.');
             }
         };
@@ -2670,7 +2642,6 @@
                     pendingUsersDiv.innerHTML = '<p style="text-align: center; padding: 20px;">사용자가 없습니다.</p>';
                 }
             } catch (error) {
-                console.error('사용자 목록 로드 오류:', error);
                 alert('사용자 목록을 불러오는데 실패했습니다.');
             }
         };
@@ -2682,7 +2653,6 @@
                 alert('승인되었습니다!');
                 showPendingUsers(); // 목록 새로고침
             } catch (error) {
-                console.error('승인 오류:', error);
                 alert('승인에 실패했습니다.');
             }
         };
@@ -2707,7 +2677,6 @@
                 const editModal = document.getElementById('editUserModal');
                 editModal.classList.add('show');
             } catch (error) {
-                console.error('사용자 정보 로드 오류:', error);
                 alert('사용자 정보를 불러오는데 실패했습니다.');
             }
         };
@@ -2764,7 +2733,6 @@
                     showAllUsers();
                 }
             } catch (error) {
-                console.error('사용자 정보 수정 오류:', error);
                 alert('사용자 정보 수정에 실패했습니다.');
             }
         };
@@ -2816,7 +2784,6 @@
                                                     await deleteObject(mediaStorageRef);
                                                 }
                                             } catch (error) {
-                                                console.error('미디어 파일 삭제 오류:', error);
                                             }
                                         }
                                     }
@@ -2841,7 +2808,6 @@
                     showAllUsers();
                 }
             } catch (error) {
-                console.error('사용자 삭제 오류:', error);
                 alert('사용자 삭제에 실패했습니다.');
             }
         };
@@ -2989,10 +2955,8 @@
                 
                 navigator.serviceWorker.register(swPath)
                     .then((registration) => {
-                        console.log('Service Worker 등록 성공:', registration.scope);
                     })
                     .catch((error) => {
-                        console.log('Service Worker 등록 실패:', error);
                     });
             });
         }
@@ -3000,7 +2964,6 @@
         // 푸시 알림 권한 요청 및 FCM 초기화
         async function initializePushNotifications(requestPermission = false) {
             if (!('Notification' in window)) {
-                console.log('이 브라우저는 알림을 지원하지 않습니다.');
                 return false;
             }
             
@@ -3010,7 +2973,6 @@
                 
                 // 권한이 차단된 경우
                 if (permission === 'denied') {
-                    console.warn('⚠️ 알림 권한이 차단되었습니다.');
                     alert('알림 권한이 차단되어 있습니다.\n\n브라우저 설정에서 알림을 허용해주세요:\n1. 주소창 왼쪽 자물쇠 아이콘 클릭\n2. "알림" 설정에서 "허용" 선택\n3. 페이지를 새로고침하세요.');
                     return false;
                 }
@@ -3021,7 +2983,6 @@
                 }
                 
                 if (permission === 'granted') {
-                    console.log('알림 권한이 허용되었습니다.');
                     
                     // Firebase Cloud Messaging 모듈 import
                     const { getMessaging, getToken, onMessage } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js');
@@ -3034,9 +2995,7 @@
                     if ('serviceWorker' in navigator) {
                         try {
                             serviceWorkerRegistration = await navigator.serviceWorker.ready;
-                            console.log('✅ Service Worker 준비 완료');
                         } catch (error) {
-                            console.error('Service Worker 준비 실패:', error);
                         }
                     }
                     
@@ -3046,7 +3005,6 @@
                     });
                     
                     if (token) {
-                        console.log('✅ FCM 토큰 획득:', token.substring(0, 20) + '...');
                         // 토큰을 Firebase Database에 저장
                         const userName = localStorage.getItem('bamboo_userName');
                         const userId = localStorage.getItem('bamboo_userId');
@@ -3056,12 +3014,10 @@
                             // 기존 토큰 확인
                             const existingToken = await get(tokenRef);
                             if (existingToken.exists() && existingToken.val() === token) {
-                                console.log('✅ FCM 토큰이 이미 저장되어 있습니다.');
                                 return;
                             }
                             
                             await set(tokenRef, token);
-                            console.log('💾 FCM 토큰 저장 시도 완료');
                             
                             // 저장 확인 (재시도 포함)
                             let retries = 3;
@@ -3069,26 +3025,17 @@
                                 await new Promise(resolve => setTimeout(resolve, 500));
                                 const savedToken = await get(tokenRef);
                                 if (savedToken.exists() && savedToken.val() === token) {
-                                    console.log('✅ FCM 토큰 저장 확인 완료');
-                                    console.log('📱 전체 토큰:', token);
                                     return;
                                 }
                                 retries--;
                             }
-                            console.error('❌ FCM 토큰 저장 확인 실패 - 저장된 값이 다릅니다.');
                         } else {
-                            console.warn('⚠️ 사용자 정보가 없어 FCM 토큰을 저장할 수 없습니다.');
-                            console.log('userId:', userId, 'userName:', userName);
                         }
                     } else {
-                        console.error('❌ FCM 토큰을 가져올 수 없습니다.');
-                        console.log('알림 권한 상태:', permission);
-                        console.log('VAPID 키 확인 필요');
                     }
                     
                     // 포그라운드 메시지 수신
                     onMessage(messaging, (payload) => {
-                        console.log('포그라운드 메시지 수신:', payload);
                         // 알림 표시
                         if (Notification.permission === 'granted') {
                             new Notification(payload.notification.title, {
@@ -3100,14 +3047,11 @@
                     
                     return true; // 성공
                 } else if (permission === 'default') {
-                    console.log('알림 권한이 아직 요청되지 않았습니다.');
                     return false;
                 } else {
-                    console.log('알림 권한이 거부되었습니다.');
                     return false;
                 }
             } catch (error) {
-                console.error('푸시 알림 초기화 오류:', error);
                 if (error.code === 'messaging/permission-blocked') {
                     alert('알림 권한이 차단되어 있습니다.\n\n브라우저 설정에서 알림을 허용해주세요:\n1. 주소창 왼쪽 자물쇠 아이콘 클릭\n2. "알림" 설정에서 "허용" 선택\n3. 페이지를 새로고침하세요.');
                 }
@@ -3128,7 +3072,6 @@
                     createdAt: new Date().toISOString()
                 });
             } catch (error) {
-                console.error('알림 전송 오류:', error);
             }
         }
         
@@ -3194,7 +3137,6 @@
                 const userSnapshot = await get(userRef);
                 
                 if (!userSnapshot.exists()) {
-                    console.log('⚠️ 사용자 정보를 찾을 수 없습니다.');
                     return;
                 }
                 
@@ -3203,11 +3145,9 @@
                 
                 // 승인되지 않은 사용자는 알림 권한 요청하지 않음
                 if (!isApproved) {
-                    console.log('ℹ️ 승인되지 않은 사용자입니다. 관리자 승인 후 알림을 받을 수 있습니다.');
                     return;
                 }
             } catch (error) {
-                console.error('사용자 정보 확인 오류:', error);
                 return;
             }
             
@@ -3216,7 +3156,6 @@
             
             // 권한이 차단된 경우
             if (currentPermission === 'denied') {
-                console.log('⚠️ 알림 권한이 차단되어 있습니다. 브라우저 설정에서 알림을 허용해주세요.');
                 return;
             }
             
@@ -3227,15 +3166,12 @@
             if (!tokenSnapshot.exists() || !tokenSnapshot.val()) {
                 // 승인된 사용자는 자동으로 알림 권한 요청
                 if (currentPermission === 'granted') {
-                    console.log('🔄 FCM 토큰이 없어서 다시 초기화합니다...');
                     await initializePushNotifications(false);
                 } else if (currentPermission === 'default') {
                     // 권한이 아직 요청되지 않은 경우 자동으로 요청
-                    console.log('🔔 승인된 사용자 - 알림 권한을 자동으로 요청합니다...');
                     await initializePushNotifications(true);
                 }
             } else {
-                console.log('✅ FCM 토큰이 이미 저장되어 있습니다.');
             }
             
             setupNotificationListener();
@@ -3246,12 +3182,10 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            console.log('📱 PWA 설치 프롬프트 준비됨');
         });
         
         // PWA 설치 완료 이벤트
         window.addEventListener('appinstalled', () => {
-            console.log('✅ PWA 설치 완료 - 알림 권한 자동 요청');
             deferredPrompt = null;
             // 설치 후 자동으로 알림 권한 요청
             setTimeout(() => {
@@ -3265,7 +3199,6 @@
             const userRef = ref(database, `users/${userId}/approved`);
             onValue(userRef, async (snapshot) => {
                 if (snapshot.exists() && snapshot.val() === true) {
-                    console.log('✅ 사용자가 승인되었습니다 - 알림 권한 자동 요청');
                     // 승인된 직후 자동으로 알림 권한 요청
                     await initNotifications(true);
                 }

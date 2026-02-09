@@ -13,7 +13,6 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('캐시 열기');
         return cache.addAll(urlsToCache);
       })
   );
@@ -26,7 +25,6 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('이전 캐시 삭제:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -48,7 +46,6 @@ self.addEventListener('fetch', (event) => {
 
 // 푸시 알림 수신
 self.addEventListener('push', (event) => {
-  console.log('푸시 알림 수신:', event);
   
   const iconPath = basePath + '/icon-192.png';
   let notificationData = {
@@ -63,7 +60,6 @@ self.addEventListener('push', (event) => {
   if (event.data) {
     try {
       const payload = event.data.json();
-      console.log('푸시 페이로드:', payload);
       
       // Firebase Messaging 형식 처리
       if (payload.notification) {
@@ -89,12 +85,10 @@ self.addEventListener('push', (event) => {
         notificationData.body = event.data.text() || notificationData.body;
       }
     } catch (e) {
-      console.error('푸시 데이터 파싱 오류:', e);
       notificationData.body = event.data.text() || notificationData.body;
     }
   }
   
-  console.log('알림 표시:', notificationData);
   
   event.waitUntil(
     self.registration.showNotification(notificationData.title, {
@@ -111,7 +105,6 @@ self.addEventListener('push', (event) => {
 
 // 알림 클릭 이벤트
 self.addEventListener('notificationclick', (event) => {
-  console.log('알림 클릭:', event);
   event.notification.close();
   
   event.waitUntil(

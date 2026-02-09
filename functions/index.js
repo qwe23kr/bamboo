@@ -28,7 +28,6 @@ exports.onPostCreated = onValueCreated(
       region: "us-central1",
     },
     async (event) => {
-      console.log("📝 새 글 작성 감지:", event.params);
       const post = event.data.val();
       const {tabName, postId} = event.params;
 
@@ -39,7 +38,6 @@ exports.onPostCreated = onValueCreated(
         return null;
       }
 
-      console.log(`작성자: ${author}, 탭: ${tabName}, 글ID: ${postId}`);
       try {
         // 모든 사용자의 FCM 토큰 가져오기
         const usersSnapshot = await admin
@@ -56,7 +54,6 @@ exports.onPostCreated = onValueCreated(
         for (const [userId, user] of Object.entries(users)) {
           // 본인 제외
           if (user.name === author) {
-            console.log(`작성자 본인 제외: ${user.name}`);
             continue;
           }
 
@@ -66,17 +63,11 @@ exports.onPostCreated = onValueCreated(
             user.name === "admin";
           if (!isApproved) {
             const userName = user.name || "이름 없음";
-            console.log(
-                `승인되지 않은 사용자 제외: ${userName} (userId: ${userId})`,
-            );
             continue;
           }
 
           if (!user.fcmToken) {
             const userName = user.name || "이름 없음";
-            console.log(
-                `FCM 토큰이 없는 사용자 제외: ${userName} (userId: ${userId})`,
-            );
             continue;
           }
 
@@ -109,21 +100,15 @@ exports.onPostCreated = onValueCreated(
 
         // 알림 전송 (100개씩 배치로 전송)
         if (messages.length > 0) {
-          console.log(`총 ${messages.length}명에게 알림 전송 시작`);
           const batchSize = 100;
           for (let i = 0; i < messages.length; i += batchSize) {
             const batch = messages.slice(i, i + batchSize);
             const result = await admin.messaging().sendEach(batch);
             const batchNum = i / batchSize + 1;
-            console.log(
-                `배치 ${batchNum} 전송 완료: ` +
-                `성공 ${result.successCount}개, 실패 ${result.failureCount}개`,
-            );
             if (result.failureCount > 0) {
               const failedTokens = [];
               result.responses.forEach((resp, idx) => {
                 if (!resp.success) {
-                  console.error(`알림 전송 실패 (인덱스 ${idx}):`, resp.error);
 
                   // 만료된 토큰 처리
                   const errorCode = resp.error && resp.error.code;
@@ -156,7 +141,6 @@ exports.onPostCreated = onValueCreated(
                         const userName = user.name || "이름 없음";
                         const logMsg = `만료된 FCM 토큰 삭제: ${userName} ` +
                             `(userId: ${userId})`;
-                        console.log(logMsg);
                         await admin
                             .database()
                             .ref(`users/${userId}/fcmToken`)
@@ -165,19 +149,15 @@ exports.onPostCreated = onValueCreated(
                     }
                   }
                 } catch (deleteError) {
-                  console.error("토큰 삭제 오류:", deleteError);
                 }
               }
             }
           }
-          console.log(`✅ 총 ${messages.length}명에게 알림 전송 완료`);
         } else {
-          console.log("⚠️ 알림을 받을 사용자가 없습니다.");
         }
 
         return null;
       } catch (error) {
-        console.error("알림 전송 오류:", error);
         return null;
       }
     },
@@ -192,7 +172,6 @@ exports.onEventCreated = onValueCreated(
       region: "us-central1",
     },
     async (event) => {
-      console.log("📅 새 일정 추가 감지:", event.params);
       const eventData = event.data.val();
       const {eventId} = event.params;
 
@@ -203,7 +182,6 @@ exports.onEventCreated = onValueCreated(
         return null;
       }
 
-      console.log(`작성자: ${author}, 일정ID: ${eventId}`);
       try {
         // 모든 사용자의 FCM 토큰 가져오기
         const usersSnapshot = await admin
@@ -220,7 +198,6 @@ exports.onEventCreated = onValueCreated(
         for (const [userId, user] of Object.entries(users)) {
           // 본인 제외
           if (user.name === author) {
-            console.log(`작성자 본인 제외: ${user.name}`);
             continue;
           }
 
@@ -230,17 +207,11 @@ exports.onEventCreated = onValueCreated(
             user.name === "admin";
           if (!isApproved) {
             const userName = user.name || "이름 없음";
-            console.log(
-                `승인되지 않은 사용자 제외: ${userName} (userId: ${userId})`,
-            );
             continue;
           }
 
           if (!user.fcmToken) {
             const userName = user.name || "이름 없음";
-            console.log(
-                `FCM 토큰이 없는 사용자 제외: ${userName} (userId: ${userId})`,
-            );
             continue;
           }
 
@@ -265,21 +236,15 @@ exports.onEventCreated = onValueCreated(
 
         // 알림 전송 (100개씩 배치로 전송)
         if (messages.length > 0) {
-          console.log(`총 ${messages.length}명에게 알림 전송 시작`);
           const batchSize = 100;
           for (let i = 0; i < messages.length; i += batchSize) {
             const batch = messages.slice(i, i + batchSize);
             const result = await admin.messaging().sendEach(batch);
             const batchNum = i / batchSize + 1;
-            console.log(
-                `배치 ${batchNum} 전송 완료: ` +
-                `성공 ${result.successCount}개, 실패 ${result.failureCount}개`,
-            );
             if (result.failureCount > 0) {
               const failedTokens = [];
               result.responses.forEach((resp, idx) => {
                 if (!resp.success) {
-                  console.error(`알림 전송 실패 (인덱스 ${idx}):`, resp.error);
 
                   // 만료된 토큰 처리
                   const errorCode = resp.error && resp.error.code;
@@ -312,7 +277,6 @@ exports.onEventCreated = onValueCreated(
                         const userName = user.name || "이름 없음";
                         const logMsg = `만료된 FCM 토큰 삭제: ${userName} ` +
                             `(userId: ${userId})`;
-                        console.log(logMsg);
                         await admin
                             .database()
                             .ref(`users/${userId}/fcmToken`)
@@ -321,19 +285,15 @@ exports.onEventCreated = onValueCreated(
                     }
                   }
                 } catch (deleteError) {
-                  console.error("토큰 삭제 오류:", deleteError);
                 }
               }
             }
           }
-          console.log(`✅ 총 ${messages.length}명에게 알림 전송 완료`);
         } else {
-          console.log("⚠️ 알림을 받을 사용자가 없습니다.");
         }
 
         return null;
       } catch (error) {
-        console.error("알림 전송 오류:", error);
         return null;
       }
     },
