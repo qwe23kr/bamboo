@@ -62,12 +62,10 @@ exports.onPostCreated = onValueCreated(
             userId === "admin" ||
             user.name === "admin";
           if (!isApproved) {
-            const userName = user.name || "이름 없음";
             continue;
           }
 
           if (!user.fcmToken) {
-            const userName = user.name || "이름 없음";
             continue;
           }
 
@@ -104,12 +102,10 @@ exports.onPostCreated = onValueCreated(
           for (let i = 0; i < messages.length; i += batchSize) {
             const batch = messages.slice(i, i + batchSize);
             const result = await admin.messaging().sendEach(batch);
-            const batchNum = i / batchSize + 1;
             if (result.failureCount > 0) {
               const failedTokens = [];
               result.responses.forEach((resp, idx) => {
                 if (!resp.success) {
-
                   // 만료된 토큰 처리
                   const errorCode = resp.error && resp.error.code;
                   const invalidCodes = [
@@ -138,9 +134,6 @@ exports.onPostCreated = onValueCreated(
                     for (const [userId, user] of Object.entries(users)) {
                       if (user.fcmToken &&
                           failedTokens.includes(user.fcmToken)) {
-                        const userName = user.name || "이름 없음";
-                        const logMsg = `만료된 FCM 토큰 삭제: ${userName} ` +
-                            `(userId: ${userId})`;
                         await admin
                             .database()
                             .ref(`users/${userId}/fcmToken`)
@@ -149,11 +142,11 @@ exports.onPostCreated = onValueCreated(
                     }
                   }
                 } catch (deleteError) {
+                  // 토큰 삭제 오류 무시
                 }
               }
             }
           }
-        } else {
         }
 
         return null;
@@ -206,12 +199,10 @@ exports.onEventCreated = onValueCreated(
             userId === "admin" ||
             user.name === "admin";
           if (!isApproved) {
-            const userName = user.name || "이름 없음";
             continue;
           }
 
           if (!user.fcmToken) {
-            const userName = user.name || "이름 없음";
             continue;
           }
 
@@ -240,12 +231,10 @@ exports.onEventCreated = onValueCreated(
           for (let i = 0; i < messages.length; i += batchSize) {
             const batch = messages.slice(i, i + batchSize);
             const result = await admin.messaging().sendEach(batch);
-            const batchNum = i / batchSize + 1;
             if (result.failureCount > 0) {
               const failedTokens = [];
               result.responses.forEach((resp, idx) => {
                 if (!resp.success) {
-
                   // 만료된 토큰 처리
                   const errorCode = resp.error && resp.error.code;
                   const invalidCodes = [
@@ -274,9 +263,6 @@ exports.onEventCreated = onValueCreated(
                     for (const [userId, user] of Object.entries(users)) {
                       if (user.fcmToken &&
                           failedTokens.includes(user.fcmToken)) {
-                        const userName = user.name || "이름 없음";
-                        const logMsg = `만료된 FCM 토큰 삭제: ${userName} ` +
-                            `(userId: ${userId})`;
                         await admin
                             .database()
                             .ref(`users/${userId}/fcmToken`)
@@ -285,11 +271,11 @@ exports.onEventCreated = onValueCreated(
                     }
                   }
                 } catch (deleteError) {
+                  // 토큰 삭제 오류 무시
                 }
               }
             }
           }
-        } else {
         }
 
         return null;
