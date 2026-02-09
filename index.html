@@ -3002,6 +3002,14 @@
                         }
                     }
                     
+                    // iOS Safari 지원을 위한 Service Worker 경로 확인
+                    let swPath = '/bamboo/firebase-messaging-sw.js';
+                    if (window.location.pathname.includes('/bamboo/')) {
+                        swPath = '/bamboo/firebase-messaging-sw.js';
+                    } else {
+                        swPath = '/firebase-messaging-sw.js';
+                    }
+                    
                     const token = await getToken(messaging, {
                         vapidKey: 'BHtWcI-zBH7NzVa1o3AFdTA-5pdYmhIizHNNCHoVGPftbRMh5iuarq3-7uxHNDffF2Z67ZGFMC9lZBuE9SC0agk',
                         serviceWorkerRegistration: serviceWorkerRegistration
