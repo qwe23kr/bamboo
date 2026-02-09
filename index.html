@@ -3188,6 +3188,29 @@
             const userId = localStorage.getItem('bamboo_userId');
             if (!userId) return;
             
+            // 사용자 승인 상태 확인
+            try {
+                const userRef = ref(database, `users/${userId}`);
+                const userSnapshot = await get(userRef);
+                
+                if (!userSnapshot.exists()) {
+                    console.log('⚠️ 사용자 정보를 찾을 수 없습니다.');
+                    return;
+                }
+                
+                const user = userSnapshot.val();
+                const isApproved = user.approved === true || userId === 'admin' || user.name === 'admin';
+                
+                // 승인되지 않은 사용자는 알림 권한 요청하지 않음
+                if (!isApproved) {
+                    console.log('ℹ️ 승인되지 않은 사용자입니다. 관리자 승인 후 알림을 받을 수 있습니다.');
+                    return;
+                }
+            } catch (error) {
+                console.error('사용자 정보 확인 오류:', error);
+                return;
+            }
+            
             // 권한 상태 확인
             const currentPermission = Notification.permission;
             
@@ -3202,13 +3225,13 @@
             const tokenSnapshot = await get(tokenRef);
             
             if (!tokenSnapshot.exists() || !tokenSnapshot.val()) {
-                // 권한이 이미 허용된 경우 자동 초기화
+                // 승인된 사용자는 자동으로 알림 권한 요청
                 if (currentPermission === 'granted') {
                     console.log('🔄 FCM 토큰이 없어서 다시 초기화합니다...');
                     await initializePushNotifications(false);
-                } else if (requestPermission) {
-                    // 권한 요청이 필요한 경우
-                    console.log('🔔 알림 권한을 요청합니다...');
+                } else if (currentPermission === 'default') {
+                    // 권한이 아직 요청되지 않은 경우 자동으로 요청
+                    console.log('🔔 승인된 사용자 - 알림 권한을 자동으로 요청합니다...');
                     await initializePushNotifications(true);
                 }
             } else {
@@ -3236,19 +3259,26 @@
             }, 1000);
         });
         
-        // 페이지 로드 시 자동으로 알림 권한 요청 (한 번만)
-        const notificationPermissionAsked = sessionStorage.getItem('notificationPermissionAsked');
-        if (!notificationPermissionAsked && Notification.permission === 'default') {
-            // 사용자와 상호작용 후 자동으로 권한 요청
-            document.addEventListener('click', async () => {
-                if (Notification.permission === 'default') {
-                    sessionStorage.setItem('notificationPermissionAsked', 'true');
+        // 승인 상태 변경 감지
+        const userId = localStorage.getItem('bamboo_userId');
+        if (userId) {
+            const userRef = ref(database, `users/${userId}/approved`);
+            onValue(userRef, async (snapshot) => {
+                if (snapshot.exists() && snapshot.val() === true) {
+                    console.log('✅ 사용자가 승인되었습니다 - 알림 권한 자동 요청');
+                    // 승인된 직후 자동으로 알림 권한 요청
                     await initNotifications(true);
                 }
-            }, { once: true });
-        } else if (Notification.permission === 'granted') {
+            });
+        }
+        
+        // 페이지 로드 시 자동으로 알림 초기화 (승인된 사용자만)
+        if (Notification.permission === 'granted') {
             // 권한이 이미 허용된 경우 자동 초기화
             initNotifications(false);
+        } else {
+            // 권한이 없는 경우에도 승인된 사용자면 자동 요청
+            initNotifications(true);
         }
         
     </script>

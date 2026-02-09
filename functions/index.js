@@ -120,11 +120,54 @@ exports.onPostCreated = onValueCreated(
                 `성공 ${result.successCount}개, 실패 ${result.failureCount}개`,
             );
             if (result.failureCount > 0) {
+              const failedTokens = [];
               result.responses.forEach((resp, idx) => {
                 if (!resp.success) {
                   console.error(`알림 전송 실패 (인덱스 ${idx}):`, resp.error);
+
+                  // 만료된 토큰 처리
+                  const errorCode = resp.error && resp.error.code;
+                  const invalidCodes = [
+                    "messaging/registration-token-not-registered",
+                    "messaging/invalid-registration-token",
+                    "messaging/invalid-argument",
+                  ];
+                  const isInvalidToken = errorCode &&
+                    invalidCodes.includes(errorCode);
+                  if (isInvalidToken) {
+                    failedTokens.push(batch[idx].token);
+                  }
                 }
               });
+
+              // 만료된 토큰 삭제
+              if (failedTokens.length > 0) {
+                try {
+                  const usersSnapshot = await admin
+                      .database()
+                      .ref("users")
+                      .once("value");
+                  const users = usersSnapshot.val();
+
+                  if (users) {
+                    for (const [userId, user] of Object.entries(users)) {
+                      if (user.fcmToken &&
+                          failedTokens.includes(user.fcmToken)) {
+                        const userName = user.name || "이름 없음";
+                        const logMsg = `만료된 FCM 토큰 삭제: ${userName} ` +
+                            `(userId: ${userId})`;
+                        console.log(logMsg);
+                        await admin
+                            .database()
+                            .ref(`users/${userId}/fcmToken`)
+                            .remove();
+                      }
+                    }
+                  }
+                } catch (deleteError) {
+                  console.error("토큰 삭제 오류:", deleteError);
+                }
+              }
             }
           }
           console.log(`✅ 총 ${messages.length}명에게 알림 전송 완료`);
@@ -233,11 +276,54 @@ exports.onEventCreated = onValueCreated(
                 `성공 ${result.successCount}개, 실패 ${result.failureCount}개`,
             );
             if (result.failureCount > 0) {
+              const failedTokens = [];
               result.responses.forEach((resp, idx) => {
                 if (!resp.success) {
                   console.error(`알림 전송 실패 (인덱스 ${idx}):`, resp.error);
+
+                  // 만료된 토큰 처리
+                  const errorCode = resp.error && resp.error.code;
+                  const invalidCodes = [
+                    "messaging/registration-token-not-registered",
+                    "messaging/invalid-registration-token",
+                    "messaging/invalid-argument",
+                  ];
+                  const isInvalidToken = errorCode &&
+                    invalidCodes.includes(errorCode);
+                  if (isInvalidToken) {
+                    failedTokens.push(batch[idx].token);
+                  }
                 }
               });
+
+              // 만료된 토큰 삭제
+              if (failedTokens.length > 0) {
+                try {
+                  const usersSnapshot = await admin
+                      .database()
+                      .ref("users")
+                      .once("value");
+                  const users = usersSnapshot.val();
+
+                  if (users) {
+                    for (const [userId, user] of Object.entries(users)) {
+                      if (user.fcmToken &&
+                          failedTokens.includes(user.fcmToken)) {
+                        const userName = user.name || "이름 없음";
+                        const logMsg = `만료된 FCM 토큰 삭제: ${userName} ` +
+                            `(userId: ${userId})`;
+                        console.log(logMsg);
+                        await admin
+                            .database()
+                            .ref(`users/${userId}/fcmToken`)
+                            .remove();
+                      }
+                    }
+                  }
+                } catch (deleteError) {
+                  console.error("토큰 삭제 오류:", deleteError);
+                }
+              }
             }
           }
           console.log(`✅ 총 ${messages.length}명에게 알림 전송 완료`);
