@@ -2,9 +2,22 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bamboo - Firebase 연결 페이지</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#ff69b4">
+    <meta name="description" content="밤부 - 대나무숲 커뮤니티">
+    <title>밤부 - 메인</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'Yanolja';
+            src: url('https://gcore.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/YanoljaYacheR.woff') format('woff');
+            font-weight: normal;
+            font-display: swap;
+        }
         * {
             margin: 0;
             padding: 0;
@@ -12,115 +25,1304 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Yanolja', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #ffb6c1 0%, #ffc0cb 50%, #ffd1dc 100%);
             min-height: 100vh;
+            padding: 10px;
+            position: relative;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* 배경 장식 */
+        body::before {
+            content: '✨';
+            position: fixed;
+            font-size: 2em;
+            color: rgba(255, 255, 255, 0.3);
+            top: 10%;
+            left: 10%;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        body::after {
+            content: '💖';
+            position: fixed;
+            font-size: 1.5em;
+            color: rgba(255, 255, 255, 0.3);
+            top: 20%;
+            right: 15%;
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        /* 별가루 효과 */
+        .sparkle {
+            position: fixed;
+            pointer-events: none;
+            font-size: 1.5em;
+            z-index: 9999;
+            animation: sparkleFall 1.5s ease-out forwards;
+            user-select: none;
+        }
+        
+        @keyframes sparkleFall {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100px) rotate(360deg) scale(0.3);
+            }
+        }
+        
+        .sparkle-emoji {
+            display: inline-block;
+            animation: sparkleRotate 1.5s linear infinite;
+        }
+        
+        @keyframes sparkleRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 18px 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(255, 182, 193, 0.3);
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 15px;
+        }
+        
+        .logo {
+            font-family: 'Yanolja', sans-serif;
+            font-size: 2.2em;
+            color: #ff69b4;
+            font-weight: normal;
+            word-break: keep-all;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }  
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .user-name {
+            color: #ff69b4;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+        
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Yanolja', sans-serif;
+            min-height: 40px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .btn-pink {
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+        }
+        
+        .btn-pink:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
+        }
+        
+        .btn-logout {
+            background: transparent;
+            color: #999;
+            border: none;
+            font-weight: 400;
+            font-size: 0.9em;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Yanolja', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .btn-logout:hover {
+            color: #666;
+        }
+        
+        /* 탭 메뉴 */
+        .tabs-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(255, 182, 193, 0.5);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            justify-content: space-around;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            background: transparent;
+            color: #999;
+            font-family: 'Yanolja', sans-serif;
+            font-size: 1em;
+            font-weight: normal;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background: #f5f5f5;
+            color: #ff69b4;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* 미디어 업로드 */
+        .media-upload-area {
+            margin-bottom: 15px;
+        }
+        
+        .upload-btn {
+            display: inline-block;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #ffc0cb 0%, #ffb6c1 100%);
+            color: #ff69b4;
+            border-radius: 15px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            font-family: 'Yanolja', sans-serif;
+            font-weight: normal;
+            border: 2px dashed #ff69b4;
+        }
+        
+        .upload-btn:hover {
+            background: linear-gradient(135deg, #ffb6c1 0%, #ffc0cb 100%);
+            transform: translateY(-2px);
+        }
+        
+        .media-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .media-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            aspect-ratio: 1;
+        }
+        
+        .media-item img,
+        .media-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .media-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .post-media {
+            margin: 15px 0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .post-media img,
+        .post-media video {
+            width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+        
+        .post-media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .post-media-grid img,
+        .post-media-grid video {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        
+        .write-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(255, 182, 193, 0.5);
+        }
+        
+        .write-title {
+            font-family: 'Yanolja', sans-serif;
+            font-size: 1.6em;
+            color: #ff69b4;
+            margin-bottom: 15px;
+            font-weight: normal;
+        }
+        
+        .write-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ffc0cb;
+            border-radius: 15px;
+            font-size: 16px; /* 모바일에서 자동 줌 방지 */
+            font-family: 'Yanolja', sans-serif;
+            resize: vertical;
+            min-height: 100px;
+            transition: all 0.3s;
+            -webkit-appearance: none;
+            font-weight: 400;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #ff69b4;
+            box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+        }
+        
+        .posts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .post {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(255, 182, 193, 0.5);
+            animation: slideIn 0.5s ease-out;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ffc0cb;
+            position: relative;
+        }
+        
+        .post-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .delete-btn {
+            background: transparent;
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Yanolja', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .delete-btn:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .edit-btn {
+            background: transparent;
+            border: 1px solid #ff69b4;
+            color: #ff69b4;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Yanolja', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .edit-btn:hover {
+            background: #ff69b4;
+            color: white;
+        }
+        
+        .post-author {
+            font-weight: 600;
+            color: #ff69b4;
+            font-size: 1.05em;
+        }
+        
+        .post-date {
+            color: #999;
+            font-size: 0.9em;
+            font-weight: 400;
+        }
+        
+        .post-content {
+            color: #333;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 1.05em;
+            font-weight: 400;
+        }
+        
+        .comments-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ffc0cb;
+        }
+        
+        .comment-form {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .comment-input {
+            width: 100%;
+            padding: 12px 50px 12px 15px;
+            border: 2px solid #ffc0cb;
+            border-radius: 20px;
+            font-family: 'Yanolja', sans-serif;
+            font-size: 16px; /* 모바일에서 자동 줌 방지 */
+            min-height: 44px;
+            -webkit-appearance: none;
+            font-weight: 400;
+            box-sizing: border-box;
+        }
+        
+        .comment-input:focus {
+            outline: none;
+            border-color: #ff69b4;
+        }
+        
+        .comment-submit-inline {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 5px;
+            color: white;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(255, 105, 180, 0.3);
+        }
+        
+        .comment-submit-inline::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 8px solid white;
+            transform: rotate(-45deg) translateX(-2px);
+            transition: all 0.2s;
+        }
+        
+        .comment-submit-inline::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 8px solid white;
+            transform: rotate(45deg) translateX(2px);
+            transition: all 0.2s;
+        }
+        
+        .comment-submit-inline:hover {
+            background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);
+            box-shadow: 0 3px 8px rgba(255, 105, 180, 0.4);
+            transform: translateY(-50%) scale(1.05);
+        }
+        
+        .comment-submit-inline:hover::before,
+        .comment-submit-inline:hover::after {
+            transform: rotate(-45deg) translateX(-2px) scale(1.1);
+        }
+        
+        .comment-submit-inline:hover::after {
+            transform: rotate(45deg) translateX(2px) scale(1.1);
+        }
+        
+        .comment-submit-inline:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        
+        .comment-submit-inline:active::before {
+            transform: rotate(-45deg) translateX(-2px) scale(0.9);
+        }
+        
+        .comment-submit-inline:active::after {
+            transform: rotate(45deg) translateX(2px) scale(0.9);
+        }
+        
+        .comment {
+            background: #fff5f5;
+            padding: 12px 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid #ff69b4;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0;
+        }
+        
+        .comment-author {
+            font-weight: 600;
+            color: #ff69b4;
+            font-size: 0.95em;
+        }
+        
+        .comment-date {
+            color: #999;
+            font-size: 0.85em;
+            font-weight: 400;
+        }
+        
+        .comment-content {
+            color: #555;
+            font-size: 0.95em;
+            font-weight: 400;
+            display: inline;
+        }
+        
+        .comment-text {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .comment-text-left {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+        }
+        
+        .comment-delete-btn {
+            background: transparent;
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Yanolja', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            margin-left: 8px;
+        }
+        
+        .comment-delete-btn:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #ff69b4;
+            padding: 50px;
+            font-size: 1.1em;
+            font-weight: 400;
+        }
+        
+        /* 달력 스타일 */
+        .calendar-container {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(255, 182, 193, 0.3);
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .calendar-title {
+            font-family: 'Yanolja', sans-serif;
+            font-size: 1.5em;
+            color: #ff69b4;
+            font-weight: normal;
+            margin: 0;
+        }
+        
+        .calendar-nav-btn {
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Yanolja', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .calendar-nav-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.4);
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .calendar-day-header {
+            text-align: center;
+            font-weight: 600;
+            color: #ff69b4;
+            padding: 6px;
+            font-family: 'Yanolja', sans-serif;
+            font-size: 0.85em;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            background: #fff5f5;
+            border: 1.5px solid #ffc0cb;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Yanolja', sans-serif;
+            position: relative;
+            min-height: 0;
+        }
+        
+        .calendar-day:hover {
+            background: #ffe4e9;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(255, 105, 180, 0.3);
+        }
+        
+        .calendar-day.other-month {
+            opacity: 0.2;
+        }
+        
+        .calendar-day.today {
+            background: linear-gradient(135deg, #ffc0cb 0%, #ffb6c1 100%);
+            border-color: #ff69b4;
+            font-weight: 600;
+        }
+        
+        .calendar-day-number {
+            font-size: 0.85em;
+            color: #333;
+            margin-bottom: 2px;
+            font-weight: 500;
+        }
+        
+        .calendar-day-events {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            width: 100%;
+            margin-top: 2px;
+        }
+        
+        .calendar-event {
+            font-size: 0.6em;
+            padding: 1px 3px;
+            border-radius: 3px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+        }
+        
+        .calendar-event.birthday {
+            background: #ff69b4;
+            color: white;
+        }
+        
+        .calendar-event.dday {
+            background: #ffc0cb;
+            color: #ff1493;
+        }
+        
+        .calendar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #ffc0cb;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Yanolja', sans-serif;
+            font-size: 0.8em;
+            color: #666;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+        
+        .calendar-events-list {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ffc0cb;
+        }
+        
+        .events-list-title {
+            font-family: 'Yanolja', sans-serif;
+            font-size: 1.3em;
+            color: #ff69b4;
+            margin-bottom: 15px;
+            font-weight: normal;
+        }
+        
+        .event-item {
+            background: #fff5f5;
+            border: 1px solid #ffc0cb;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            font-family: 'Yanolja', sans-serif;
+        }
+        
+        .event-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .event-date {
+            color: #ff69b4;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .event-delete-btn {
+            background: transparent;
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: 0.75em;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Yanolja', sans-serif;
+        }
+        
+        .event-delete-btn:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .event-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .event-description {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .calendar-event.schedule {
+            width: 6px;
+            height: 6px;
+            background: #90EE90;
+            border-radius: 50%;
+            margin: 0 auto;
+            padding: 0;
+            text-indent: -9999px;
+            overflow: hidden;
+        }
+        
+        /* 관리자 승인 모달 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
         
-        .container {
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
             background: white;
             border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
             max-width: 600px;
             width: 100%;
-            text-align: center;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
         
-        h1 {
-            color: #333;
+        .modal-title {
+            font-family: 'Yanolja', sans-serif;
+            font-size: 1.8em;
+            color: #ff69b4;
             margin-bottom: 20px;
-            font-size: 2.5em;
+            font-weight: normal;
         }
         
-        .status {
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            font-weight: bold;
+        .close-btn {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            line-height: 1;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .status.connected {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+        .close-btn:hover {
+            color: #ff69b4;
+            transform: rotate(90deg);
         }
         
-        .status.disconnected {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
         
-        button {
-            background: #667eea;
+        /* 플로팅 + 버튼 */
+        .floating-add-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
             color: white;
             border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-size: 16px;
+            font-size: 2em;
+            font-weight: bold;
             cursor: pointer;
-            margin: 10px;
+            box-shadow: 0 4px 20px rgba(255, 105, 180, 0.5);
             transition: all 0.3s;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Yanolja', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
         
-        button:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        .floating-add-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 6px 25px rgba(255, 105, 180, 0.7);
         }
         
-        .info {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            text-align: left;
+        .floating-add-btn:active {
+            transform: scale(0.95);
         }
         
-        .info h3 {
-            color: #667eea;
+        /* 플로팅 버튼은 JavaScript로 제어 */
+        
+        .pending-user {
+            background: #fff5f5;
+            padding: 15px;
+            border-radius: 15px;
             margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
-        .info p {
-            color: #666;
-            line-height: 1.6;
-            margin: 5px 0;
+        .user-details {
+            flex: 1;
+        }
+        
+        .user-details strong {
+            color: #ff69b4;
+        }
+        
+        /* 모바일 최적화 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px 5px;
+            }
+            
+            .header {
+                flex-direction: row;
+                text-align: left;
+                padding: 15px;
+                gap: 10px;
+            }
+            
+            .logo {
+                font-size: 1.5em;
+                line-height: 1.2;
+            }
+            
+            .user-info {
+                width: auto;
+                justify-content: flex-end;
+                flex-direction: row;
+                align-items: center;
+            }
+            
+            .btn {
+                width: auto;
+                font-size: 0.9em;
+                padding: 10px 16px;
+            }
+            
+            .btn-logout {
+                font-size: 0.85em;
+                padding: 6px 10px;
+            }
+            
+            .write-section {
+                padding: 15px;
+            }
+            
+            .write-title {
+                font-size: 1.5em;
+            }
+            
+            .post {
+                padding: 15px;
+            }
+            
+            .post-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .post-author {
+                font-size: 1em;
+            }
+            
+            .post-date {
+                font-size: 0.85em;
+            }
+            
+            .post-content {
+                font-size: 1em;
+                line-height: 1.6;
+            }
+            
+            .comment-form {
+                position: relative;
+            }
+            
+            .comment-input {
+                width: 100%;
+                padding-right: 50px;
+            }
+            
+            .comment-submit-inline {
+                right: 5px;
+                font-size: 1.3em;
+            }
+            
+            .comment {
+                padding: 10px 12px;
+            }
+            
+            .comment-text {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .comment-date {
+                align-self: flex-end;
+            }
+            
+            .modal-content {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .modal-title {
+                font-size: 1.5em;
+            }
+            
+            .pending-user {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .pending-user .btn {
+                width: 100%;
+            }
+            
+            .tabs {
+                gap: 5px;
+            }
+            
+            .tab-btn {
+                padding: 10px 12px;
+                font-size: 0.9em;
+            }
+            
+            .media-preview {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+            
+            .post-media-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .floating-add-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 1.8em;
+                bottom: 20px;
+                right: 20px;
+            }
+            
+            .calendar-container {
+                padding: 12px;
+            }
+            
+            .calendar-title {
+                font-size: 1.3em;
+            }
+            
+            .calendar-nav-btn {
+                width: 30px;
+                height: 30px;
+                font-size: 0.9em;
+            }
+            
+            .calendar-grid {
+                gap: 3px;
+            }
+            
+            .calendar-day-header {
+                padding: 4px;
+                font-size: 0.75em;
+            }
+            
+            .calendar-day {
+                padding: 3px;
+                border-width: 1px;
+            }
+            
+            .calendar-day-number {
+                font-size: 0.75em;
+            }
+            
+            .calendar-event {
+                font-size: 0.5em;
+                padding: 1px 2px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 1.3em;
+            }
+            
+            .header {
+                padding: 12px 15px;
+                gap: 8px;
+            }
+            
+            .user-info {
+                gap: 8px;
+            }
+            
+            .user-name {
+                font-size: 0.85em;
+            }
+            
+            .write-title {
+                font-size: 1.3em;
+            }
+            
+            .post-content {
+                font-size: 0.95em;
+            }
+            
+            body::before,
+            body::after {
+                display: none; /* 작은 화면에서는 배경 장식 숨김 */
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎋 Bamboo</h1>
-        <p style="color: #666; margin-bottom: 20px;">Firebase 연결 테스트 페이지</p>
-        
-        <div id="status" class="status disconnected">
-            Firebase 연결 중...
+    <div class="header">
+        <div class="logo">✨ 밤부 ✨ - 대나무숲</div>
+        <div class="user-info">
+            <span class="user-name" id="userName">로딩 중...</span>
+            <button id="approveBtn" class="btn btn-pink" onclick="openApproveModal()" style="display: none;">가입승인</button>
+            <button class="btn-logout" onclick="logout()">로그아웃</button>
         </div>
-        
-        <button onclick="testConnection()">연결 테스트</button>
-        <button onclick="writeData()">데이터 쓰기</button>
-        <button onclick="readData()">데이터 읽기</button>
-        
-        <div class="info">
-            <h3>📊 상태 정보</h3>
-            <p id="info">초기화 중...</p>
+    </div>
+    
+    <!-- 탭 메뉴 -->
+    <div class="tabs-container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="praise" onclick="switchTab('praise')">칭찬하기</button>
+            <button class="tab-btn" data-tab="complaint" onclick="switchTab('complaint')">민원제기</button>
+            <button class="tab-btn" data-tab="daily" onclick="switchTab('daily')">일상로그</button>
+            <button class="tab-btn" data-tab="calendar" onclick="switchTab('calendar')">일정공유</button>
+        </div>
+    </div>
+    
+    <!-- 칭찬하기 탭 -->
+    <div id="praiseTab" class="tab-content active">
+        <div class="posts-container" id="praisePosts"></div>
+    </div>
+    
+    <!-- 민원제기 탭 -->
+    <div id="complaintTab" class="tab-content">
+        <div class="posts-container" id="complaintPosts"></div>
+    </div>
+    
+    <!-- 일상로그 탭 -->
+    <div id="dailyTab" class="tab-content">
+        <div class="posts-container" id="dailyPosts"></div>
+    </div>
+    
+    <!-- 달력 탭 -->
+    <div id="calendarTab" class="tab-content">
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <button class="calendar-nav-btn" onclick="changeMonth(-1)">◀</button>
+                <h2 class="calendar-title" id="calendarTitle">2026년 2월</h2>
+                <button class="calendar-nav-btn" onclick="changeMonth(1)">▶</button>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+            <div class="calendar-legend">
+                <div class="legend-item">
+                    <span class="legend-color" style="background: #ff69b4;"></span>
+                    <span>생일</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background: #ffc0cb;"></span>
+                    <span>D+이벤트</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background: #90EE90;"></span>
+                    <span>일정</span>
+                </div>
+            </div>
+            <div class="calendar-events-list" id="calendarEventsList">
+                <h3 class="events-list-title">📅 일정 목록</h3>
+                <div id="eventsListContainer"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 일정 추가 모달 -->
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="eventModalTitle">일정 추가</h2>
+                <button class="close-btn" onclick="closeEventModal()">&times;</button>
+            </div>
+            <form id="eventForm" class="write-form">
+                <input type="hidden" id="eventDate" value="">
+                <input type="text" id="eventTitle" placeholder="일정 제목을 입력하세요..." required>
+                <textarea id="eventDescription" placeholder="일정 설명 (선택사항)" rows="3"></textarea>
+                <button type="submit" class="btn btn-pink">일정 추가</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 플로팅 + 버튼 -->
+    <button id="floatingAddBtn" class="floating-add-btn" onclick="openWriteModal()">+</button>
+    
+    <!-- 글 작성 모달 -->
+    <div id="writeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="writeModalTitle">💕 칭찬하기</h2>
+                <button class="close-btn" onclick="closeWriteModal()">&times;</button>
+            </div>
+            
+            <form id="writeForm" class="write-form">
+                <input type="hidden" id="editPostId" value="">
+                <input type="hidden" id="editTabName" value="">
+                
+                <textarea id="writeContent" placeholder="내용을 작성해주세요 💭" rows="6" required></textarea>
+                
+                <!-- 일상로그일 때만 미디어 업로드 표시 -->
+                <div id="mediaUploadSection" class="media-upload-area" style="display: none;">
+                    <input type="file" id="mediaInput" accept="image/*,video/*" multiple style="display: none;" onchange="handleMediaSelect(event)">
+                    <label for="mediaInput" class="upload-btn">
+                        <span>📷 사진/영상 추가</span>
+                    </label>
+                    <div id="mediaPreview" class="media-preview"></div>
+                </div>
+                
+                <button type="submit" class="btn btn-pink" id="writeSubmitBtn">작성하기</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 관리자 승인 모달 -->
+    <div id="approveModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">가입승인</h2>
+            <div id="pendingUsers"></div>
         </div>
     </div>
 
     <!-- Firebase SDK -->
     <script type="module">
-        // Firebase 설정은 Firebase Console에서 복사한 값을 아래에 입력하세요
-        // FIREBASE_SETUP.md 파일을 참고하세요!
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { 
+            getDatabase, 
+            ref, 
+            get,
+            set,
+            push,
+            onValue,
+            remove
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import {
+            getStorage,
+            ref as storageRef,
+            uploadBytes,
+            getDownloadURL,
+            deleteObject
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
         
-        // ✅ Firebase 설정 완료!
+        // Firebase 설정
         const firebaseConfig = {
             apiKey: "AIzaSyCx92CLNVBaHLKNxaaY5Ydnrm8HksNapnw",
             authDomain: "bamboo-5008c.firebaseapp.com",
@@ -133,101 +1335,1512 @@
         };
         
         // Firebase 초기화
-        try {
-            const app = initializeApp(firebaseConfig);
-            const database = getDatabase(app);
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const storage = getStorage(app);
+        
+        // 전역 변수로 설정
+        window.firebaseDatabase = database;
+        window.firebaseStorage = storage;
+        window.firebaseRef = ref;
+        window.firebaseGet = get;
+        window.firebaseSet = set;
+        window.firebasePush = push;
+        window.firebaseOnValue = onValue;
+        window.firebaseRemove = remove;
+        window.storageRef = storageRef;
+        window.uploadBytes = uploadBytes;
+        window.getDownloadURL = getDownloadURL;
+        window.deleteObject = deleteObject;
+        
+        // 현재 탭
+        window.currentTab = 'praise';
+        
+        // 사용자 정보 로드
+        function loadUserInfo() {
+            const userId = localStorage.getItem('bamboo_userId');
+            const userName = localStorage.getItem('bamboo_userName');
+            const isAdmin = localStorage.getItem('bamboo_isAdmin') === 'true';
             
-            // 전역 변수로 설정
-            window.firebaseApp = app;
-            window.firebaseDatabase = database;
-            window.firebaseRef = ref;
-            window.firebaseSet = set;
-            window.firebaseGet = get;
+            if (!userId) {
+                window.location.href = 'login.html';
+                return;
+            }
             
-            // 연결 상태 업데이트
-            updateStatus(true);
-            updateInfo('✅ Firebase 초기화 완료! 데이터베이스 연결 준비됨.');
-        } catch (error) {
-            updateStatus(false);
-            updateInfo('❌ Firebase 초기화 오류: ' + error.message);
-            console.error('Firebase 초기화 오류:', error);
+            document.getElementById('userName').textContent = userName + '님';
+            
+            if (isAdmin) {
+                document.getElementById('approveBtn').style.display = 'block';
+            }
+            
+            // 탭별 글 목록 로드
+            loadTabPosts('praise');
+            
+            // 플로팅 버튼 표시
+            const floatingBtn = document.getElementById('floatingAddBtn');
+            floatingBtn.style.display = 'flex';
         }
-    </script>
-    
-    <script>
-        function updateStatus(connected) {
-            const statusEl = document.getElementById('status');
-            if (connected) {
-                statusEl.textContent = '✅ Firebase 연결됨';
-                statusEl.className = 'status connected';
+        
+        // 탭 전환
+        window.switchTab = function(tabName) {
+            window.currentTab = tabName;
+            
+            // 탭 버튼 활성화
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // 탭 컨텐츠 표시
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            
+            // 플로팅 + 버튼 (달력 탭에서는 숨김)
+            const floatingBtn = document.getElementById('floatingAddBtn');
+            if (tabName === 'calendar') {
+                floatingBtn.style.display = 'none';
             } else {
-                statusEl.textContent = '❌ Firebase 연결 안됨';
-                statusEl.className = 'status disconnected';
+                floatingBtn.style.display = 'flex';
             }
-        }
-        
-        function updateInfo(message) {
-            document.getElementById('info').textContent = message;
-        }
-        
-        async function testConnection() {
-            try {
-                updateInfo('연결 테스트 중...');
-                // 간단한 연결 테스트
-                updateInfo('✅ Firebase 연결 성공!');
-                alert('Firebase 연결이 정상적으로 작동합니다!');
-            } catch (error) {
-                updateInfo('❌ 오류: ' + error.message);
-                alert('연결 실패: ' + error.message);
+            
+            // 해당 탭의 컨텐츠 로드
+            if (tabName === 'calendar') {
+                renderCalendar();
+            } else {
+                loadTabPosts(tabName);
             }
-        }
+        };
         
-        async function writeData() {
-            try {
-                if (!window.firebaseSet || !window.firebaseRef || !window.firebaseDatabase) {
-                    alert('Firebase가 아직 초기화되지 않았습니다.');
-                    return;
-                }
-                
-                updateInfo('데이터 쓰기 중...');
-                const testRef = window.firebaseRef(window.firebaseDatabase, 'test/data');
-                await window.firebaseSet(testRef, {
-                    message: '안녕하세요!',
-                    timestamp: new Date().toISOString(),
-                    value: Math.random()
+        // 달력 관련 변수
+        let currentCalendarDate = new Date(2026, 1, 7); // 2026년 2월 7일 (D+1 기준일)
+        const dDayBase = new Date(2026, 1, 7); // 2026년 2월 7일
+        
+        // 달력 렌더링
+        async function renderCalendar() {
+            const calendarGrid = document.getElementById('calendarGrid');
+            const calendarTitle = document.getElementById('calendarTitle');
+            
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            calendarTitle.textContent = `${year}년 ${month + 1}월`;
+            
+            // 사용자 생년월일 가져오기
+            const usersRef = ref(database, 'users');
+            const usersSnapshot = await get(usersRef);
+            const birthdays = {};
+            
+            if (usersSnapshot.exists()) {
+                const users = usersSnapshot.val();
+                Object.values(users).forEach(user => {
+                    if (user.birthdate && user.approved) {
+                        const birthDate = new Date(user.birthdate);
+                        const monthKey = `${birthDate.getMonth()}-${birthDate.getDate()}`;
+                        if (!birthdays[monthKey]) {
+                            birthdays[monthKey] = [];
+                        }
+                        birthdays[monthKey].push({
+                            name: user.name,
+                            year: birthDate.getFullYear()
+                        });
+                    }
                 });
-                updateInfo('✅ 데이터 쓰기 성공!');
-                alert('데이터가 성공적으로 저장되었습니다!');
-            } catch (error) {
-                updateInfo('❌ 오류: ' + error.message);
-                alert('데이터 쓰기 실패: ' + error.message);
             }
+            
+            // 일정 가져오기
+            const eventsRef = ref(database, 'events');
+            const eventsSnapshot = await get(eventsRef);
+            const events = {};
+            
+            if (eventsSnapshot.exists()) {
+                const eventsData = eventsSnapshot.val();
+                Object.entries(eventsData).forEach(([eventId, event]) => {
+                    const eventDate = new Date(event.date);
+                    const dateKey = `${eventDate.getFullYear()}-${eventDate.getMonth()}-${eventDate.getDate()}`;
+                    if (!events[dateKey]) {
+                        events[dateKey] = [];
+                    }
+                    events[dateKey].push({
+                        id: eventId,
+                        title: event.title,
+                        description: event.description,
+                        author: event.author
+                    });
+                });
+            }
+            
+            // 달력 그리드 초기화
+            calendarGrid.innerHTML = '';
+            
+            // 요일 헤더
+            const dayHeaders = ['일', '월', '화', '수', '목', '금', '토'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                calendarGrid.appendChild(header);
+            });
+            
+            // 첫 날과 마지막 날 계산
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - startDate.getDay());
+            
+            // 달력 날짜 생성 (필요한 주 수만 계산)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // 마지막 날짜 계산
+            const endDate = new Date(lastDay);
+            endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
+            
+            // 필요한 날짜 수 계산
+            const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            
+            for (let i = 0; i < totalDays; i++) {
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + i);
+                
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                
+                const isCurrentMonth = currentDate.getMonth() === month;
+                const isToday = currentDate.getTime() === today.getTime();
+                
+                if (!isCurrentMonth) {
+                    dayDiv.classList.add('other-month');
+                }
+                if (isToday) {
+                    dayDiv.classList.add('today');
+                }
+                
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'calendar-day-number';
+                dayNumber.textContent = currentDate.getDate();
+                dayDiv.appendChild(dayNumber);
+                
+                const eventsDiv = document.createElement('div');
+                eventsDiv.className = 'calendar-day-events';
+                
+                // 생일 체크
+                const monthKey = `${currentDate.getMonth()}-${currentDate.getDate()}`;
+                if (birthdays[monthKey]) {
+                    birthdays[monthKey].forEach(birthday => {
+                        const event = document.createElement('div');
+                        event.className = 'calendar-event birthday';
+                        event.textContent = `🎂 ${birthday.name}`;
+                        event.title = `${birthday.name} 생일`;
+                        eventsDiv.appendChild(event);
+                    });
+                }
+                
+                // D+이벤트 체크 (2026년 2월 7일 기준)
+                if (isCurrentMonth) {
+                    const daysDiff = Math.floor((currentDate - dDayBase) / (1000 * 60 * 60 * 24));
+                    if (daysDiff >= 0) {
+                        const years = Math.floor(daysDiff / 365);
+                        if (years > 0 && daysDiff % 365 === 0) {
+                            const event = document.createElement('div');
+                            event.className = 'calendar-event dday';
+                            event.textContent = `D+${daysDiff} (${years}년)`;
+                            event.title = `D+${daysDiff} (${years}년)`;
+                            eventsDiv.appendChild(event);
+                        } else if (daysDiff > 0 && daysDiff % 365 !== 0) {
+                            // 1년 미만이지만 특정 날짜 체크
+                            const event = document.createElement('div');
+                            event.className = 'calendar-event dday';
+                            event.textContent = `D+${daysDiff}`;
+                            event.title = `D+${daysDiff}`;
+                            eventsDiv.appendChild(event);
+                        }
+                    }
+                }
+                
+                // 일정 체크
+                const dateKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDate()}`;
+                if (events[dateKey] && events[dateKey].length > 0) {
+                    const event = document.createElement('div');
+                    event.className = 'calendar-event schedule';
+                    const eventTitles = events[dateKey].map(e => e.title).join(', ');
+                    event.title = eventTitles;
+                    eventsDiv.appendChild(event);
+                }
+                
+                // 날짜 클릭 이벤트 추가
+                if (isCurrentMonth) {
+                    dayDiv.style.cursor = 'pointer';
+                    dayDiv.onclick = () => openEventModal(currentDate);
+                }
+                
+                dayDiv.appendChild(eventsDiv);
+                calendarGrid.appendChild(dayDiv);
+            }
+            
+            // 일정 목록 표시
+            loadEventsList();
         }
         
-        async function readData() {
+        // 일정 목록 로드
+        async function loadEventsList() {
+            const eventsRef = ref(database, 'events');
+            const eventsSnapshot = await get(eventsRef);
+            const container = document.getElementById('eventsListContainer');
+            
+            container.innerHTML = '';
+            
+            if (!eventsSnapshot.exists()) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">등록된 일정이 없습니다.</p>';
+                return;
+            }
+            
+            const eventsData = eventsSnapshot.val();
+            const eventsArray = Object.entries(eventsData)
+                .map(([id, event]) => ({
+                    id,
+                    ...event,
+                    date: new Date(event.date)
+                }))
+                .sort((a, b) => a.date - b.date);
+            
+            eventsArray.forEach(event => {
+                const eventDiv = document.createElement('div');
+                eventDiv.className = 'event-item';
+                
+                const dateStr = event.date.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                const currentUserName = localStorage.getItem('bamboo_userName');
+                const isOwner = event.author === currentUserName;
+                const deleteBtn = isOwner ? `<button class="event-delete-btn" onclick="deleteEvent('${event.id}')">삭제</button>` : '';
+                
+                eventDiv.innerHTML = `
+                    <div class="event-item-header">
+                        <span class="event-date">${dateStr}</span>
+                        ${deleteBtn}
+                    </div>
+                    <div class="event-title">${event.title}</div>
+                    ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
+                `;
+                
+                container.appendChild(eventDiv);
+            });
+        }
+        
+        // 일정 모달 열기
+        window.openEventModal = function(date) {
+            const modal = document.getElementById('eventModal');
+            const dateInput = document.getElementById('eventDate');
+            const titleInput = document.getElementById('eventTitle');
+            const descInput = document.getElementById('eventDescription');
+            
+            dateInput.value = date.toISOString().split('T')[0];
+            titleInput.value = '';
+            descInput.value = '';
+            
+            const dateStr = date.toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('eventModalTitle').textContent = `${dateStr} 일정 추가`;
+            
+            modal.classList.add('show');
+        };
+        
+        // 일정 모달 닫기
+        window.closeEventModal = function() {
+            document.getElementById('eventModal').classList.remove('show');
+        };
+        
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('eventModal').addEventListener('click', (e) => {
+            if (e.target.id === 'eventModal') {
+                closeEventModal();
+            }
+        });
+        
+        // 일정 추가
+        document.getElementById('eventForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const date = document.getElementById('eventDate').value;
+            const title = document.getElementById('eventTitle').value.trim();
+            const description = document.getElementById('eventDescription').value.trim();
+            
+            if (!title) {
+                alert('일정 제목을 입력해주세요.');
+                return;
+            }
+            
             try {
-                if (!window.firebaseGet || !window.firebaseRef || !window.firebaseDatabase) {
-                    alert('Firebase가 아직 초기화되지 않았습니다.');
+                const userName = localStorage.getItem('bamboo_userName');
+                const eventsRef = ref(database, 'events');
+                const newEventRef = push(eventsRef);
+                
+                await set(newEventRef, {
+                    date: date,
+                    title: title,
+                    description: description || '',
+                    author: userName,
+                    createdAt: new Date().toISOString()
+                });
+                
+                // 일정 추가 시 알림 트리거
+                await sendNotificationToUsers({
+                    title: '새 일정이 등록되었습니다',
+                    body: `${userName}님이 "${title}" 일정을 추가했습니다.`,
+                    type: 'event',
+                    eventId: newEventRef.key
+                });
+                
+                closeEventModal();
+                renderCalendar();
+                alert('일정이 추가되었습니다!');
+            } catch (error) {
+                console.error('일정 추가 오류:', error);
+                alert('일정 추가에 실패했습니다.');
+            }
+        });
+        
+        // 일정 삭제
+        window.deleteEvent = async function(eventId) {
+            if (!confirm('정말 이 일정을 삭제하시겠습니까?')) {
+                return;
+            }
+            
+            try {
+                const eventRef = ref(database, `events/${eventId}`);
+                await remove(eventRef);
+                renderCalendar();
+                alert('일정이 삭제되었습니다.');
+            } catch (error) {
+                console.error('일정 삭제 오류:', error);
+                alert('일정 삭제에 실패했습니다.');
+            }
+        };
+        
+        // 월 변경
+        window.changeMonth = function(direction) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+            renderCalendar();
+        };
+        
+        // 탭별 글 목록 로드
+        function loadTabPosts(tabName) {
+            const postsRef = ref(database, `posts/${tabName}`);
+            const postsContainer = document.getElementById(`${tabName}Posts`);
+            
+            onValue(postsRef, (snapshot) => {
+                postsContainer.innerHTML = '';
+                
+                if (!snapshot.exists()) {
+                    postsContainer.innerHTML = '<div class="loading">아직 글이 없습니다. 첫 글을 작성해보세요! 💕</div>';
                     return;
                 }
                 
-                updateInfo('데이터 읽기 중...');
-                const testRef = window.firebaseRef(window.firebaseDatabase, 'test/data');
-                const snapshot = await window.firebaseGet(testRef);
+                const posts = snapshot.val();
+                const postsArray = Object.entries(posts).sort((a, b) => {
+                    return new Date(b[1].createdAt) - new Date(a[1].createdAt);
+                });
                 
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    updateInfo(`✅ 데이터 읽기 성공: ${JSON.stringify(data, null, 2)}`);
-                    alert('데이터: ' + JSON.stringify(data, null, 2));
+                postsArray.forEach(([postId, post]) => {
+                    const postElement = createPostElement(postId, post, tabName);
+                    postsContainer.appendChild(postElement);
+                });
+            });
+        }
+        
+        // 글 요소 생성
+        function createPostElement(postId, post, tabName) {
+            const postDiv = document.createElement('div');
+            postDiv.className = 'post';
+            
+            const date = new Date(post.createdAt);
+            const dateStr = date.toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // 본인 글 확인
+            const currentUserName = localStorage.getItem('bamboo_userName');
+            const isOwner = post.author === currentUserName;
+            const isAdmin = localStorage.getItem('bamboo_isAdmin') === 'true';
+            
+            // 본인 글 또는 관리자인 경우 수정/삭제 버튼 표시
+            let actionButtonsHTML = '';
+            if (isOwner || isAdmin) {
+                if (isOwner) {
+                    actionButtonsHTML = `
+                        <button class="edit-btn" onclick="editPost('${postId}', '${tabName}')">수정</button>
+                        <button class="delete-btn" onclick="deletePost('${postId}', '${tabName}')">삭제</button>
+                    `;
+                } else if (isAdmin) {
+                    actionButtonsHTML = `<button class="delete-btn" onclick="deletePost('${postId}', '${tabName}')">삭제</button>`;
+                }
+            }
+            
+            let mediaHTML = '';
+            if (post.media && post.media.length > 0) {
+                if (post.media.length === 1) {
+                    if (post.media[0].type === 'video') {
+                        mediaHTML = `<div class="post-media"><video controls><source src="${post.media[0].url}" type="video/mp4"></video></div>`;
+                    } else {
+                        mediaHTML = `<div class="post-media"><img src="${post.media[0].url}" alt="이미지"></div>`;
+                    }
                 } else {
-                    updateInfo('읽을 데이터가 없습니다.');
-                    alert('저장된 데이터가 없습니다. 먼저 "데이터 쓰기"를 실행해주세요.');
+                    mediaHTML = '<div class="post-media-grid">';
+                    post.media.forEach(media => {
+                        if (media.type === 'video') {
+                            mediaHTML += `<video controls><source src="${media.url}" type="video/mp4"></video>`;
+                        } else {
+                            mediaHTML += `<img src="${media.url}" alt="이미지">`;
+                        }
+                    });
+                    mediaHTML += '</div>';
+                }
+            }
+            
+            const contentHTML = post.content ? `<div class="post-content">${post.content}</div>` : '';
+            
+            postDiv.innerHTML = `
+                <div class="post-header">
+                    <div>
+                        <div class="post-author">👤 ${post.author}</div>
+                        <div class="post-date">📅 ${dateStr}</div>
+                    </div>
+                    <div class="post-actions">
+                        ${actionButtonsHTML}
+                    </div>
+                </div>
+                ${contentHTML}
+                ${mediaHTML}
+                <div class="comments-section">
+                    <div id="comments-${tabName}-${postId}"></div>
+                    <div class="comment-form">
+                        <input type="text" class="comment-input" id="comment-input-${tabName}-${postId}" placeholder="댓글을 입력하세요..." data-post-id="${postId}" data-tab="${tabName}">
+                        <button type="button" class="comment-submit-inline comment-submit-btn" data-post-id="${postId}" data-tab="${tabName}" title="댓글 작성"></button>
+                    </div>
+                </div>
+            `;
+            
+            // DOM에 추가한 후 댓글 로드
+            // setTimeout을 사용하여 DOM이 완전히 렌더링된 후 댓글 로드
+            setTimeout(() => {
+                loadComments(postId, tabName);
+            }, 0);
+            
+            return postDiv;
+        }
+        
+        // 댓글 로드 (리스너 관리용)
+        const commentListeners = new Map();
+        
+        function loadComments(postId, tabName) {
+            const commentsRef = ref(database, `posts/${tabName}/${postId}/comments`);
+            const listenerKey = `${tabName}-${postId}`;
+            const containerId = `comments-${tabName}-${postId}`;
+            
+            console.log('댓글 로드 시작:', { postId, tabName, containerId });
+            
+            // 기존 리스너가 있으면 제거 (off 함수 사용)
+            if (commentListeners.has(listenerKey)) {
+                const unsubscribe = commentListeners.get(listenerKey);
+                if (unsubscribe) {
+                    unsubscribe();
+                }
+            }
+            
+            // 댓글 표시 함수
+            const renderComments = (snapshot) => {
+                const commentsContainer = document.getElementById(containerId);
+                if (!commentsContainer) {
+                    console.warn('댓글 컨테이너를 찾을 수 없습니다:', containerId);
+                    // DOM이 준비될 때까지 기다렸다가 다시 시도
+                    setTimeout(() => {
+                        renderComments(snapshot);
+                    }, 100);
+                    return;
+                }
+                
+                commentsContainer.innerHTML = '';
+                
+                if (!snapshot.exists()) {
+                    console.log('댓글이 없습니다.');
+                    return;
+                }
+                
+                const comments = snapshot.val();
+                console.log('댓글 데이터 수신:', comments);
+                
+                const commentsArray = Object.entries(comments).sort((a, b) => {
+                    return new Date(a[1].createdAt) - new Date(b[1].createdAt);
+                });
+                
+                console.log(`댓글 ${commentsArray.length}개를 표시합니다.`);
+                
+                commentsArray.forEach(([commentId, comment]) => {
+                    try {
+                        const commentElement = createCommentElement(comment, commentId, postId, tabName);
+                        commentsContainer.appendChild(commentElement);
+                    } catch (error) {
+                        console.error('댓글 요소 생성 오류:', error, comment);
+                    }
+                });
+                
+                console.log(`${commentsArray.length}개의 댓글이 표시되었습니다.`);
+            };
+            
+            // onValue는 unsubscribe 함수를 반환합니다
+            const unsubscribe = onValue(commentsRef, (snapshot) => {
+                renderComments(snapshot);
+            }, (error) => {
+                console.error('댓글 로드 오류:', error);
+            });
+            
+            commentListeners.set(listenerKey, unsubscribe);
+        }
+        
+        // 댓글 요소 생성
+        function createCommentElement(comment, commentId, postId, tabName) {
+            const commentDiv = document.createElement('div');
+            commentDiv.className = 'comment';
+            
+            const date = new Date(comment.createdAt);
+            const dateStr = date.toLocaleDateString('ko-KR', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // 본인 댓글 확인
+            const currentUserName = localStorage.getItem('bamboo_userName');
+            const isOwner = comment.author === currentUserName;
+            const deleteBtnHTML = isOwner ? `<button class="comment-delete-btn" onclick="deleteComment('${commentId}', '${postId}', '${tabName}')">삭제</button>` : '';
+            
+            commentDiv.innerHTML = `
+                <div class="comment-text">
+                    <div class="comment-text-left">
+                        <span class="comment-author">${comment.author}</span>
+                        <span style="color: #999;">:</span>
+                        <span class="comment-content">${comment.content}</span>
+                        ${deleteBtnHTML}
+                    </div>
+                    <div class="comment-date">${dateStr}</div>
+                </div>
+            `;
+            
+            return commentDiv;
+        }
+        
+        // 댓글 추가
+        window.addComment = async function(postId, tabName, inputElement) {
+            const content = inputElement.value.trim();
+            if (!content) {
+                alert('댓글 내용을 입력해주세요.');
+                return;
+            }
+            
+            if (!postId || !tabName) {
+                console.error('댓글 추가 오류: postId 또는 tabName이 없습니다.', { postId, tabName });
+                alert('댓글 작성에 실패했습니다. 페이지를 새로고침해주세요.');
+                return;
+            }
+            
+            try {
+                const userName = localStorage.getItem('bamboo_userName');
+                if (!userName) {
+                    alert('로그인이 필요합니다.');
+                    return;
+                }
+                
+                console.log('댓글 추가 시도:', { postId, tabName, userName, content });
+                
+                const commentsRef = ref(database, `posts/${tabName}/${postId}/comments`);
+                const newCommentRef = push(commentsRef);
+                
+                const commentData = {
+                    author: userName,
+                    content: content,
+                    createdAt: new Date().toISOString()
+                };
+                
+                console.log('댓글 데이터 저장:', commentData);
+                
+                await set(newCommentRef, commentData);
+                
+                console.log('댓글 저장 완료');
+                inputElement.value = '';
+                
+                // 댓글 목록이 자동으로 업데이트되도록 onValue 리스너가 처리함
+                // 추가 확인을 위해 잠시 후 로드
+                setTimeout(() => {
+                    const commentsContainer = document.getElementById(`comments-${tabName}-${postId}`);
+                    if (commentsContainer) {
+                        console.log('댓글 컨테이너 확인:', commentsContainer.id);
+                    } else {
+                        console.error('댓글 컨테이너를 찾을 수 없습니다:', `comments-${tabName}-${postId}`);
+                    }
+                }, 500);
+            } catch (error) {
+                console.error('댓글 작성 오류:', error);
+                console.error('오류 상세:', {
+                    message: error.message,
+                    code: error.code,
+                    postId,
+                    tabName
+                });
+                alert('댓글 작성에 실패했습니다: ' + (error.message || '알 수 없는 오류'));
+            }
+        };
+        
+        // 댓글 삭제
+        window.deleteComment = async function(commentId, postId, tabName) {
+            try {
+                const currentUserName = localStorage.getItem('bamboo_userName');
+                if (!currentUserName) {
+                    alert('로그인이 필요합니다.');
+                    return;
+                }
+                
+                // 댓글 데이터 확인
+                const commentRef = ref(database, `posts/${tabName}/${postId}/comments/${commentId}`);
+                const commentSnapshot = await get(commentRef);
+                
+                if (!commentSnapshot.exists()) {
+                    alert('댓글을 찾을 수 없습니다.');
+                    return;
+                }
+                
+                const comment = commentSnapshot.val();
+                
+                // 본인 댓글인지 확인
+                if (comment.author !== currentUserName) {
+                    alert('본인의 댓글만 삭제할 수 있습니다.');
+                    return;
+                }
+                
+                if (!confirm('정말 이 댓글을 삭제하시겠습니까?')) {
+                    return;
+                }
+                
+                // 댓글 삭제
+                await remove(commentRef);
+                alert('댓글이 삭제되었습니다.');
+                
+            } catch (error) {
+                console.error('댓글 삭제 오류:', error);
+                alert('댓글 삭제에 실패했습니다.');
+            }
+        };
+        
+        // 이미지 압축 (더 빠른 업로드를 위해 더 작게)
+        function compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 0.7) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onerror = reject;
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onerror = reject;
+                    img.onload = () => {
+                        try {
+                            const canvas = document.createElement('canvas');
+                            let width = img.width;
+                            let height = img.height;
+                            
+                            // 비율 유지하면서 크기 조정
+                            if (width > height) {
+                                if (width > maxWidth) {
+                                    height = (height * maxWidth) / width;
+                                    width = maxWidth;
+                                }
+                            } else {
+                                if (height > maxHeight) {
+                                    width = (width * maxHeight) / height;
+                                    height = maxHeight;
+                                }
+                            }
+                            
+                            canvas.width = width;
+                            canvas.height = height;
+                            
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            
+                            canvas.toBlob((blob) => {
+                                if (blob) {
+                                    resolve(blob);
+                                } else {
+                                    reject(new Error('이미지 압축 실패'));
+                                }
+                            }, 'image/jpeg', quality);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // 미디어 선택 처리
+        window.handleMediaSelect = async function(event) {
+            try {
+                const files = Array.from(event.target.files);
+                const preview = document.getElementById('mediaPreview');
+                
+                if (!preview) {
+                    console.error('미리보기 컨테이너를 찾을 수 없습니다.');
+                    return;
+                }
+                
+                preview.innerHTML = '';
+                
+                if (files.length === 0) {
+                    return;
+                }
+                
+                window.selectedMedia = [];
+                
+                for (const file of files) {
+                    const isImage = file.type.startsWith('image/');
+                    const isVideo = file.type.startsWith('video/');
+                    
+                    if (!isImage && !isVideo) {
+                        alert(`${file.name}은(는) 지원하지 않는 파일 형식입니다.`);
+                        continue;
+                    }
+                    
+                    // 파일 크기 체크 (100MB 제한)
+                    const maxSize = 100 * 1024 * 1024; // 100MB
+                    if (file.size > maxSize) {
+                        alert(`${file.name}의 크기가 너무 큽니다. (최대 100MB)`);
+                        continue;
+                    }
+                    
+                    let processedFile = file;
+                    let previewUrl = URL.createObjectURL(file);
+                    
+                // 이미지인 경우 압축 (300KB 이상이면 압축)
+                if (isImage && file.size > 300 * 1024) {
+                        try {
+                            processedFile = await compressImage(file);
+                            URL.revokeObjectURL(previewUrl); // 이전 URL 해제
+                            previewUrl = URL.createObjectURL(processedFile);
+                        } catch (compressError) {
+                            console.error('이미지 압축 오류:', compressError);
+                            // 압축 실패 시 원본 파일 사용
+                        }
+                    }
+                    
+                    window.selectedMedia.push({
+                        file: processedFile,
+                        type: isImage ? 'image' : 'video',
+                        previewUrl: previewUrl,
+                        originalName: file.name
+                    });
+                    
+                    // 미리보기 추가
+                    const mediaItem = document.createElement('div');
+                    mediaItem.className = 'media-item';
+                    
+                    if (isImage) {
+                        mediaItem.innerHTML = `<img src="${previewUrl}" alt="미리보기"><button class="remove-btn" onclick="removeMedia(${window.selectedMedia.length - 1})">×</button>`;
+                    } else {
+                        mediaItem.innerHTML = `<video src="${previewUrl}" controls></video><button class="remove-btn" onclick="removeMedia(${window.selectedMedia.length - 1})">×</button>`;
+                    }
+                    
+                    preview.appendChild(mediaItem);
+                }
+                
+                if (window.selectedMedia.length > 0) {
+                    console.log(`${window.selectedMedia.length}개의 파일이 선택되었습니다.`);
                 }
             } catch (error) {
-                updateInfo('❌ 오류: ' + error.message);
-                alert('데이터 읽기 실패: ' + error.message);
+                console.error('미디어 선택 처리 오류:', error);
+                alert('파일 선택 중 오류가 발생했습니다: ' + error.message);
+            }
+        };
+        
+        // 미디어 제거
+        window.removeMedia = function(index) {
+            window.selectedMedia.splice(index, 1);
+            const preview = document.getElementById('mediaPreview');
+            preview.innerHTML = '';
+            
+            window.selectedMedia.forEach((media, idx) => {
+                const mediaItem = document.createElement('div');
+                mediaItem.className = 'media-item';
+                if (media.type === 'image') {
+                    mediaItem.innerHTML = `<img src="${media.previewUrl}" alt="미리보기"><button class="remove-btn" onclick="removeMedia(${idx})">×</button>`;
+                } else {
+                    mediaItem.innerHTML = `<video src="${media.previewUrl}" controls></video><button class="remove-btn" onclick="removeMedia(${idx})">×</button>`;
+                }
+                preview.appendChild(mediaItem);
+            });
+        };
+        
+        // 글 작성 모달 열기
+        window.openWriteModal = function() {
+            const currentTab = window.currentTab;
+            const modal = document.getElementById('writeModal');
+            const titleEl = document.getElementById('writeModalTitle');
+            const mediaSection = document.getElementById('mediaUploadSection');
+            const contentInput = document.getElementById('writeContent');
+            const submitBtn = document.getElementById('writeSubmitBtn');
+            
+            // 탭에 맞게 제목 변경
+            if (currentTab === 'praise') {
+                titleEl.textContent = '💕 칭찬하기';
+                contentInput.placeholder = '칭찬하고 싶은 내용을 작성해주세요 💭';
+                mediaSection.style.display = 'none';
+                contentInput.required = true;
+            } else if (currentTab === 'complaint') {
+                titleEl.textContent = '📢 민원제기';
+                contentInput.placeholder = '민원 내용을 작성해주세요 📝';
+                mediaSection.style.display = 'none';
+                contentInput.required = true;
+            } else if (currentTab === 'daily') {
+                titleEl.textContent = '📸 일상로그';
+                contentInput.placeholder = '무엇을 생각하고 계신가요? 💭 (선택사항)';
+                mediaSection.style.display = 'block';
+                contentInput.required = false;
+            }
+            
+            // 수정 모드 초기화
+            document.getElementById('editPostId').value = '';
+            document.getElementById('editTabName').value = '';
+            submitBtn.textContent = '작성하기';
+            
+            modal.classList.add('show');
+        };
+        
+        // 글 작성 모달 닫기
+        window.closeWriteModal = function() {
+            const modal = document.getElementById('writeModal');
+            modal.classList.remove('show');
+            document.getElementById('writeForm').reset();
+            document.getElementById('mediaPreview').innerHTML = '';
+            window.selectedMedia = [];
+            document.getElementById('editPostId').value = '';
+            document.getElementById('editTabName').value = '';
+        };
+        
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('writeModal').addEventListener('click', (e) => {
+            if (e.target.id === 'writeModal') {
+                closeWriteModal();
+            }
+        });
+        
+        // 글 수정
+        window.editPost = async function(postId, tabName) {
+            try {
+                const postRef = ref(database, `posts/${tabName}/${postId}`);
+                const postSnapshot = await get(postRef);
+                
+                if (!postSnapshot.exists()) {
+                    alert('글을 찾을 수 없습니다.');
+                    return;
+                }
+                
+                const post = postSnapshot.val();
+                const currentUserName = localStorage.getItem('bamboo_userName');
+                
+                if (post.author !== currentUserName) {
+                    alert('본인의 글만 수정할 수 있습니다.');
+                    return;
+                }
+                
+                // 모달 열기
+                const modal = document.getElementById('writeModal');
+                const titleEl = document.getElementById('writeModalTitle');
+                const contentInput = document.getElementById('writeContent');
+                const mediaSection = document.getElementById('mediaUploadSection');
+                const submitBtn = document.getElementById('writeSubmitBtn');
+                
+                // 탭에 맞게 설정
+                if (tabName === 'praise') {
+                    titleEl.textContent = '💕 칭찬하기 수정';
+                    mediaSection.style.display = 'none';
+                } else if (tabName === 'complaint') {
+                    titleEl.textContent = '📢 민원제기 수정';
+                    mediaSection.style.display = 'none';
+                } else if (tabName === 'daily') {
+                    titleEl.textContent = '📸 일상로그 수정';
+                    mediaSection.style.display = 'block';
+                    // 기존 미디어는 수정 불가 (새로 업로드만 가능)
+                }
+                
+                // 내용 채우기
+                contentInput.value = post.content || '';
+                document.getElementById('editPostId').value = postId;
+                document.getElementById('editTabName').value = tabName;
+                submitBtn.textContent = '수정하기';
+                
+                modal.classList.add('show');
+                
+            } catch (error) {
+                console.error('글 수정 오류:', error);
+                alert('글을 불러오는데 실패했습니다.');
+            }
+        };
+        
+        // 통합 글 작성/수정
+        document.getElementById('writeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            const content = document.getElementById('writeContent').value.trim();
+            const editPostId = document.getElementById('editPostId').value;
+            const editTabName = document.getElementById('editTabName').value;
+            const currentTab = editTabName || window.currentTab;
+            const hasMedia = window.selectedMedia && window.selectedMedia.length > 0;
+            const isEditMode = editPostId !== '';
+            
+            try {
+                // 검증
+                if (currentTab === 'daily') {
+                    if (!content && !hasMedia) {
+                        alert('글 또는 사진/영상을 입력해주세요.');
+                        return;
+                    }
+                } else {
+                    if (!content) {
+                        alert('내용을 입력해주세요.');
+                        return;
+                    }
+                }
+                
+                // 버튼 비활성화 및 로딩 표시
+                submitBtn.disabled = true;
+                submitBtn.textContent = isEditMode ? '수정 중...' : '업로드 중...';
+                
+                const userName = localStorage.getItem('bamboo_userName');
+                let postId;
+                let postRef;
+                
+                if (isEditMode) {
+                    // 수정 모드
+                    postId = editPostId;
+                    postRef = ref(database, `posts/${currentTab}/${postId}`);
+                    
+                    // 본인 글 확인
+                    const postSnapshot = await get(postRef);
+                    if (!postSnapshot.exists() || postSnapshot.val().author !== userName) {
+                        alert('본인의 글만 수정할 수 있습니다.');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                        return;
+                    }
+                } else {
+                    // 작성 모드
+                    const postsRef = ref(database, `posts/${currentTab}`);
+                    const newPostRef = push(postsRef);
+                    postId = newPostRef.key;
+                    postRef = newPostRef;
+                }
+                
+                let mediaUrls = [];
+                
+                // 일상로그이고 미디어가 있는 경우 업로드
+                if (currentTab === 'daily' && hasMedia) {
+                    submitBtn.textContent = `업로드 중... (0/${window.selectedMedia.length})`;
+                    
+                    // UUID 생성 함수
+                    const generateUUID = () => {
+                        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+                            const r = Math.random() * 16 | 0;
+                            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                            return v.toString(16);
+                        });
+                    };
+                    
+                    const uploadPromises = window.selectedMedia.map(async (media, i) => {
+                        const uuid = generateUUID();
+                        const random = Math.random().toString(36).substring(2, 15);
+                        const fileName = `${uuid}_${Date.now()}_${random}.${media.type === 'image' ? 'jpg' : 'mp4'}`;
+                        const mediaStorageRef = storageRef(storage, `daily/${postId}/${fileName}`);
+                        
+                        try {
+                            await uploadBytes(mediaStorageRef, media.file);
+                            const downloadURL = await getDownloadURL(mediaStorageRef);
+                            
+                            const completed = i + 1;
+                            submitBtn.textContent = `업로드 중... (${completed}/${window.selectedMedia.length})`;
+                            
+                            return {
+                                url: downloadURL,
+                                type: media.type
+                            };
+                        } catch (uploadError) {
+                            console.error('미디어 업로드 오류:', uploadError);
+                            throw new Error(`파일 업로드 실패: ${uploadError.message}`);
+                        }
+                    });
+                    
+                    mediaUrls = await Promise.all(uploadPromises);
+                } else if (isEditMode && currentTab === 'daily') {
+                    // 수정 모드: 기존 미디어 유지
+                    const postSnapshot = await get(postRef);
+                    if (postSnapshot.exists() && postSnapshot.val().media) {
+                        mediaUrls = postSnapshot.val().media;
+                    }
+                }
+                
+                // 글 저장/수정
+                submitBtn.textContent = isEditMode ? '수정 중...' : '저장 중...';
+                const postData = {
+                    author: userName,
+                    createdAt: isEditMode ? (await get(postRef)).val().createdAt : new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                
+                if (content) {
+                    postData.content = content;
+                }
+                
+                if (currentTab === 'daily' && mediaUrls.length > 0) {
+                    postData.media = mediaUrls;
+                }
+                
+                await set(postRef, postData);
+                
+                // 새 글 작성 시 알림 트리거 (수정이 아닐 때만)
+                if (!isEditMode) {
+                    const tabNames = {
+                        'praise': '칭찬하기',
+                        'complaint': '민원제기',
+                        'daily': '일상로그'
+                    };
+                    await sendNotificationToUsers({
+                        title: '새 글이 등록되었습니다',
+                        body: `${userName}님이 ${tabNames[currentTab]}에 새 글을 작성했습니다.`,
+                        type: 'post',
+                        tab: currentTab,
+                        postId: postId
+                    });
+                }
+                
+                // 폼 초기화 및 모달 닫기
+                closeWriteModal();
+                alert(isEditMode ? '수정이 완료되었습니다!' : '작성이 완료되었습니다!');
+                
+            } catch (error) {
+                console.error('글 작성/수정 오류:', error);
+                let errorMessage = isEditMode ? '수정에 실패했습니다.' : '작성에 실패했습니다.';
+                
+                if (error.message.includes('storage/unauthorized')) {
+                    errorMessage = 'Firebase Storage가 활성화되지 않았습니다. Firebase Console에서 Storage를 활성화해주세요.';
+                } else if (error.message.includes('storage/quota-exceeded')) {
+                    errorMessage = '저장 공간이 부족합니다.';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                alert(errorMessage);
+            } finally {
+                // 버튼 복원
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+        
+        // 글 삭제 (본인 또는 관리자)
+        window.deletePost = async function(postId, tabName) {
+            const currentUserName = localStorage.getItem('bamboo_userName');
+            const isAdmin = localStorage.getItem('bamboo_isAdmin') === 'true';
+            
+            try {
+                // 글 데이터 가져오기
+                const postRef = ref(database, `posts/${tabName}/${postId}`);
+                const postSnapshot = await get(postRef);
+                
+                if (!postSnapshot.exists()) {
+                    alert('글을 찾을 수 없습니다.');
+                    return;
+                }
+                
+                const post = postSnapshot.val();
+                
+                // 본인 글 또는 관리자인지 확인
+                if (post.author !== currentUserName && !isAdmin) {
+                    alert('본인의 글만 삭제할 수 있습니다.');
+                    return;
+                }
+                
+                if (!confirm('정말 이 글을 삭제하시겠습니까?')) {
+                    return;
+                }
+                
+                // 일상로그인 경우 Storage에서 미디어 파일 삭제
+                if (tabName === 'daily' && post.media && post.media.length > 0) {
+                    for (const media of post.media) {
+                        try {
+                            // URL에서 파일 경로 추출
+                            const url = media.url;
+                            const pathMatch = url.match(/daily%2F([^?]+)/);
+                            if (pathMatch) {
+                                const filePath = `daily/${decodeURIComponent(pathMatch[1])}`;
+                                const mediaStorageRef = storageRef(storage, filePath);
+                                await deleteObject(mediaStorageRef);
+                            }
+                        } catch (error) {
+                            console.error('미디어 파일 삭제 오류:', error);
+                        }
+                    }
+                }
+                
+                // Database에서 글 삭제 (댓글도 함께 삭제됨)
+                await remove(postRef);
+                alert('글이 삭제되었습니다.');
+                
+            } catch (error) {
+                console.error('글 삭제 오류:', error);
+                alert('글 삭제에 실패했습니다.');
+            }
+        };
+        
+        // 관리자 승인 모달 열기
+        window.openApproveModal = async function() {
+            const modal = document.getElementById('approveModal');
+            const pendingUsersDiv = document.getElementById('pendingUsers');
+            
+            try {
+                const usersRef = ref(database, 'users');
+                const snapshot = await get(usersRef);
+                
+                pendingUsersDiv.innerHTML = '';
+                
+                if (!snapshot.exists()) {
+                    pendingUsersDiv.innerHTML = '<p>대기 중인 사용자가 없습니다.</p>';
+                    modal.classList.add('show');
+                    return;
+                }
+                
+                const users = snapshot.val();
+                let hasPending = false;
+                
+                for (const [userId, user] of Object.entries(users)) {
+                    if (!user.approved && user.name !== 'admin') {
+                        hasPending = true;
+                        const userDiv = document.createElement('div');
+                        userDiv.className = 'pending-user';
+                        userDiv.innerHTML = `
+                            <div class="user-details">
+                                <strong>이름:</strong> ${user.name}<br>
+                                <strong>생년월일:</strong> ${user.birthdate || '없음'}<br>
+                                <strong>핸드폰:</strong> ${user.phone || '없음'}
+                            </div>
+                            <button class="btn btn-pink" onclick="approveUser('${userId}')">승인</button>
+                        `;
+                        pendingUsersDiv.appendChild(userDiv);
+                    }
+                }
+                
+                if (!hasPending) {
+                    pendingUsersDiv.innerHTML = '<p>대기 중인 사용자가 없습니다.</p>';
+                }
+                
+                modal.classList.add('show');
+            } catch (error) {
+                console.error('사용자 목록 로드 오류:', error);
+                alert('사용자 목록을 불러오는데 실패했습니다.');
+            }
+        };
+        
+        // 사용자 승인
+        window.approveUser = async function(userId) {
+            try {
+                const userRef = ref(database, `users/${userId}`);
+                await set(ref(database, `users/${userId}/approved`), true);
+                alert('승인되었습니다!');
+                openApproveModal(); // 목록 새로고침
+            } catch (error) {
+                console.error('승인 오류:', error);
+                alert('승인에 실패했습니다.');
+            }
+        };
+        
+        // 모달 닫기
+        document.getElementById('approveModal').addEventListener('click', (e) => {
+            if (e.target.id === 'approveModal') {
+                document.getElementById('approveModal').classList.remove('show');
+            }
+        });
+        
+        // 로그아웃
+        window.logout = function() {
+            localStorage.removeItem('bamboo_userId');
+            localStorage.removeItem('bamboo_userName');
+            localStorage.removeItem('bamboo_isAdmin');
+            window.location.href = 'login.html';
+        };
+        
+        // 댓글 버튼 클릭 이벤트 (이벤트 위임)
+        document.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('comment-submit-btn')) {
+                e.preventDefault();
+                const postId = e.target.dataset.postId;
+                const tabName = e.target.dataset.tab;
+                const inputElement = document.getElementById(`comment-input-${tabName}-${postId}`);
+                if (inputElement) {
+                    await addComment(postId, tabName, inputElement);
+                }
+            }
+        });
+        
+        // 엔터키로 댓글 작성
+        document.addEventListener('keypress', async (e) => {
+            if (e.target.classList.contains('comment-input') && e.key === 'Enter') {
+                e.preventDefault();
+                const postId = e.target.dataset.postId;
+                const tabName = e.target.dataset.tab;
+                if (postId && tabName) {
+                    await addComment(postId, tabName, e.target);
+                }
+            }
+        });
+        
+        // 별가루 효과
+        const sparkles = ['✨', '⭐', '💫', '🌟', '💖', '💕', '🌸', '🦋'];
+        let sparkleCount = 0;
+        const maxSparkles = 20; // 최대 별가루 개수 제한
+        
+        function createSparkle(x, y) {
+            if (sparkleCount >= maxSparkles) return;
+            
+            sparkleCount++;
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            
+            // 랜덤 이모지 선택
+            const emoji = sparkles[Math.floor(Math.random() * sparkles.length)];
+            sparkle.innerHTML = `<span class="sparkle-emoji">${emoji}</span>`;
+            
+            // 랜덤 위치 오프셋
+            const offsetX = (Math.random() - 0.5) * 50;
+            const offsetY = (Math.random() - 0.5) * 50;
+            
+            sparkle.style.left = (x + offsetX) + 'px';
+            sparkle.style.top = (y + offsetY) + 'px';
+            
+            // 랜덤 크기
+            const size = 0.8 + Math.random() * 0.7;
+            sparkle.style.fontSize = (size * 1.5) + 'em';
+            
+            // 랜덤 회전 방향
+            const rotation = Math.random() * 360;
+            sparkle.style.setProperty('--rotation', rotation + 'deg');
+            
+            document.body.appendChild(sparkle);
+            
+            // 애니메이션 종료 후 제거
+            setTimeout(() => {
+                sparkle.remove();
+                sparkleCount--;
+            }, 1500);
+        }
+        
+        // 마우스 움직임 감지
+        let mouseMoveTimer;
+        document.addEventListener('mousemove', (e) => {
+            // 너무 빠른 마우스 움직임 제한 (성능 최적화)
+            clearTimeout(mouseMoveTimer);
+            mouseMoveTimer = setTimeout(() => {
+                createSparkle(e.clientX, e.clientY);
+            }, 50); // 50ms마다 별가루 생성
+        });
+        
+        // 터치 이벤트 감지 (모바일)
+        let touchMoveTimer;
+        document.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                clearTimeout(touchMoveTimer);
+                touchMoveTimer = setTimeout(() => {
+                    createSparkle(touch.clientX, touch.clientY);
+                }, 100); // 모바일은 조금 더 느리게
+            }
+        }, { passive: true });
+        
+        // 클릭/터치 시에도 별가루 생성
+        document.addEventListener('click', (e) => {
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    createSparkle(e.clientX, e.clientY);
+                }, i * 50);
+            }
+        });
+        
+        // 터치 종료 시 별가루 생성
+        document.addEventListener('touchend', (e) => {
+            if (e.changedTouches.length > 0) {
+                const touch = e.changedTouches[0];
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        createSparkle(touch.clientX, touch.clientY);
+                    }, i * 50);
+                }
+            }
+        }, { passive: true });
+        
+        // 페이지 로드 시 사용자 정보 가져오기
+        loadUserInfo();
+        
+        // PWA Service Worker 등록
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker 등록 성공:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('Service Worker 등록 실패:', error);
+                    });
+            });
+        }
+        
+        // 푸시 알림 권한 요청 및 FCM 초기화
+        async function initializePushNotifications() {
+            if (!('Notification' in window)) {
+                console.log('이 브라우저는 알림을 지원하지 않습니다.');
+                return;
+            }
+            
+            try {
+                // Firebase Cloud Messaging 가져오기
+                const { getMessaging, getToken, onMessage } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js');
+                
+                // 알림 권한 요청
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    console.log('알림 권한이 허용되었습니다.');
+                    
+                    // FCM 토큰 가져오기
+                    const messaging = getMessaging();
+                    const token = await getToken(messaging, {
+                        vapidKey: 'BHtWcI-zBH7NzVa1o3AFdTA-5pdYmhIizHNNCHoVGPftbRMh5iuarq3-7uxHNDffF2Z67ZGFMC9lZBuE9SC0agk'
+                    });
+                    
+                    if (token) {
+                        console.log('FCM 토큰:', token);
+                        // 토큰을 Firebase Database에 저장 (선택사항)
+                        const userName = localStorage.getItem('bamboo_userName');
+                        const userId = localStorage.getItem('bamboo_userId');
+                        if (userName && userId) {
+                            const tokenRef = ref(database, `users/${userId}/fcmToken`);
+                            await set(tokenRef, token);
+                        }
+                    }
+                    
+                    // 포그라운드 메시지 수신
+                    onMessage(messaging, (payload) => {
+                        console.log('포그라운드 메시지 수신:', payload);
+                        // 알림 표시
+                        if (Notification.permission === 'granted') {
+                            new Notification(payload.notification.title, {
+                                body: payload.notification.body,
+                                icon: payload.notification.icon || '/icon-192.png'
+                            });
+                        }
+                    });
+                } else {
+                    console.log('알림 권한이 거부되었습니다.');
+                }
+            } catch (error) {
+                console.error('푸시 알림 초기화 오류:', error);
             }
         }
+        
+        // 알림 전송 함수 (다른 사용자들에게 알림 데이터 저장)
+        async function sendNotificationToUsers(notificationData) {
+            try {
+                const userName = localStorage.getItem('bamboo_userName');
+                const notificationsRef = ref(database, 'notifications');
+                const newNotificationRef = push(notificationsRef);
+                
+                await set(newNotificationRef, {
+                    ...notificationData,
+                    author: userName,
+                    createdAt: new Date().toISOString()
+                });
+            } catch (error) {
+                console.error('알림 전송 오류:', error);
+            }
+        }
+        
+        // 실시간 알림 감지 및 표시
+        function setupNotificationListener() {
+            const currentUserName = localStorage.getItem('bamboo_userName');
+            if (!currentUserName) return;
+            
+            const notificationsRef = ref(database, 'notifications');
+            let lastNotificationTime = Date.now();
+            
+            onValue(notificationsRef, (snapshot) => {
+                if (!snapshot.exists()) return;
+                
+                const notifications = snapshot.val();
+                const notificationsArray = Object.entries(notifications)
+                    .map(([id, notif]) => ({ id, ...notif }))
+                    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                
+                // 최신 알림만 확인 (본인이 작성한 것은 제외)
+                notificationsArray.forEach(notif => {
+                    const notifTime = new Date(notif.createdAt).getTime();
+                    if (notifTime > lastNotificationTime && notif.author !== currentUserName) {
+                        // 로컬 알림 표시
+                        if (Notification.permission === 'granted') {
+                            const notification = new Notification(notif.title, {
+                                body: notif.body,
+                                icon: '/icon-192.png',
+                                badge: '/icon-192.png',
+                                tag: notif.type,
+                                data: {
+                                    type: notif.type,
+                                    tab: notif.tab,
+                                    postId: notif.postId,
+                                    eventId: notif.eventId
+                                }
+                            });
+                            
+                            // 알림 클릭 시 해당 탭으로 이동
+                            notification.onclick = () => {
+                                window.focus();
+                                if (notif.type === 'post' && notif.tab) {
+                                    switchTab(notif.tab);
+                                } else if (notif.type === 'event') {
+                                    switchTab('calendar');
+                                }
+                            };
+                        }
+                        lastNotificationTime = notifTime;
+                    }
+                });
+            });
+        }
+        
+        // 로그인 후 푸시 알림 초기화
+        setTimeout(() => {
+            const userId = localStorage.getItem('bamboo_userId');
+            if (userId) {
+                initializePushNotifications();
+                setupNotificationListener();
+            }
+        }, 3000);
+        
     </script>
 </body>
 </html>
