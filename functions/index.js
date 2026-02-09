@@ -94,7 +94,8 @@ exports.onPostCreated = onValueCreated(
             webpush: {
               notification: {
                 title: "새 글이 등록되었습니다",
-                body: `${author}님이 ${tabNames[tabName] || tabName}에 새 글을 작성했습니다.`,
+                body: `${author}님이 ` +
+                  `${tabNames[tabName] || tabName}에 새 글을 작성했습니다.`,
                 icon: "/bamboo/icon-192.png",
                 badge: "/bamboo/icon-192.png",
                 requireInteraction: false,
