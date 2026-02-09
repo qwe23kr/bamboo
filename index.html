@@ -7,6 +7,7 @@
     <meta name="description" content="밤부 - 대나무숲 커뮤니티">
     <title>밤부 - 메인</title>
     <link rel="manifest" href="/bamboo/manifest.json">
+    <link rel="icon" type="image/png" href="/bamboo/icon-192.png">
     <link rel="apple-touch-icon" href="/bamboo/icon-192.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1213,7 +1214,7 @@
         <div class="user-info">
             <span class="user-name" id="userName">로딩 중...</span>
             <button id="approveBtn" class="btn btn-pink" onclick="openUserManagementModal()" style="display: none;">사용자 관리</button>
-            <button class="btn-logout" onclick="logout()">로그아웃</button>
+            <button class="btn-logout" id="logoutBtn">로그아웃</button>
         </div>
     </div>
     
@@ -1868,8 +1869,8 @@
             postDiv.innerHTML = `
                 <div class="post-header">
                     <div>
-                        <div class="post-author">👤 ${post.author}</div>
-                        <div class="post-date">📅 ${dateStr}</div>
+                        <div class="post-author"> ${post.author}</div>
+                        <div class="post-date"> ${dateStr}</div>
                     </div>
                     <div class="post-actions">
                         ${actionButtonsHTML}
@@ -2033,11 +2034,6 @@
                 }, 500);
             } catch (error) {
                 // 댓글 작성 오류 처리
-                    message: error.message,
-                    code: error.code,
-                    postId,
-                    tabName
-                });
                 alert('댓글 작성에 실패했습니다: ' + (error.message || '알 수 없는 오류'));
             }
         };
@@ -2824,15 +2820,6 @@
                 closeEditUserModal();
             }
         });
-        
-        
-        // 로그아웃
-        window.logout = function() {
-            localStorage.removeItem('bamboo_userId');
-            localStorage.removeItem('bamboo_userName');
-            localStorage.removeItem('bamboo_isAdmin');
-            window.location.href = 'login.html';
-        };
         
         // 댓글 버튼 클릭 이벤트 (이벤트 위임)
         document.addEventListener('click', async (e) => {
