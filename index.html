@@ -968,6 +968,31 @@
             flex: 1;
         }
         
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ffc0cb;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: 'Yanolja', sans-serif;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #ff69b4;
+        }
+        
         .user-details strong {
             color: #ff69b4;
         }
@@ -1187,7 +1212,7 @@
         <div class="logo">✨ 밤부 ✨ - 대나무숲</div>
         <div class="user-info">
             <span class="user-name" id="userName">로딩 중...</span>
-            <button id="approveBtn" class="btn btn-pink" onclick="openApproveModal()" style="display: none;">가입승인</button>
+            <button id="approveBtn" class="btn btn-pink" onclick="openUserManagementModal()" style="display: none;">사용자 관리</button>
             <button class="btn-logout" onclick="logout()">로그아웃</button>
         </div>
     </div>
@@ -1294,11 +1319,41 @@
         </div>
     </div>
     
-    <!-- 관리자 승인 모달 -->
+    <!-- 관리자 사용자 관리 모달 -->
     <div id="approveModal" class="modal">
-        <div class="modal-content">
-            <h2 class="modal-title">가입승인</h2>
+        <div class="modal-content" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+            <h2 class="modal-title">사용자 관리</h2>
+            <div style="margin-bottom: 15px;">
+                <button class="btn btn-pink" onclick="showPendingUsers()" style="margin-right: 10px;">승인 대기</button>
+                <button class="btn btn-pink" onclick="showAllUsers()">전체 사용자</button>
+            </div>
             <div id="pendingUsers"></div>
+        </div>
+    </div>
+    
+    <!-- 사용자 수정 모달 -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <h2 class="modal-title">사용자 정보 수정</h2>
+            <form id="editUserForm" onsubmit="saveUserEdit(event)">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label>이름</label>
+                    <input type="text" id="editUserName" required>
+                </div>
+                <div class="form-group">
+                    <label>생년월일</label>
+                    <input type="date" id="editUserBirthdate">
+                </div>
+                <div class="form-group">
+                    <label>핸드폰 번호</label>
+                    <input type="tel" id="editUserPhone" placeholder="010-1234-5678">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-pink" style="flex: 1;">저장</button>
+                    <button type="button" class="btn" onclick="closeEditUserModal()" style="flex: 1; background: #ccc;">취소</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -1310,6 +1365,7 @@
             ref, 
             get,
             set,
+            update,
             push,
             onValue,
             remove
@@ -2512,24 +2568,30 @@
             }
         };
         
-        // 관리자 승인 모달 열기
-        window.openApproveModal = async function() {
+        // 사용자 관리 모달 열기
+        window.openUserManagementModal = function() {
             const modal = document.getElementById('approveModal');
+            modal.classList.add('show');
+            showPendingUsers(); // 기본으로 승인 대기 목록 표시
+        };
+        
+        // 승인 대기 사용자 표시
+        window.showPendingUsers = async function() {
             const pendingUsersDiv = document.getElementById('pendingUsers');
             
             try {
                 const usersRef = ref(database, 'users');
                 const snapshot = await get(usersRef);
                 
-                pendingUsersDiv.innerHTML = '';
+                pendingUsersDiv.innerHTML = '<p style="text-align: center; padding: 20px;">로딩 중...</p>';
                 
                 if (!snapshot.exists()) {
-                    pendingUsersDiv.innerHTML = '<p>대기 중인 사용자가 없습니다.</p>';
-                    modal.classList.add('show');
+                    pendingUsersDiv.innerHTML = '<p style="text-align: center; padding: 20px;">대기 중인 사용자가 없습니다.</p>';
                     return;
                 }
                 
                 const users = snapshot.val();
+                pendingUsersDiv.innerHTML = '';
                 let hasPending = false;
                 
                 for (const [userId, user] of Object.entries(users)) {
@@ -2541,19 +2603,72 @@
                             <div class="user-details">
                                 <strong>이름:</strong> ${user.name}<br>
                                 <strong>생년월일:</strong> ${user.birthdate || '없음'}<br>
-                                <strong>핸드폰:</strong> ${user.phone || '없음'}
+                                <strong>핸드폰:</strong> ${user.phone || '없음'}<br>
+                                <strong>가입일:</strong> ${user.createdAt ? new Date(user.createdAt).toLocaleDateString('ko-KR') : '없음'}
                             </div>
-                            <button class="btn btn-pink" onclick="approveUser('${userId}')">승인</button>
+                            <div style="display: flex; gap: 5px; flex-direction: column;">
+                                <button class="btn btn-pink" onclick="approveUser('${userId}')">승인</button>
+                                <button class="btn" onclick="editUser('${userId}')" style="background: #ffb6c1;">수정</button>
+                                <button class="btn" onclick="deleteUser('${userId}')" style="background: #ff6b6b; color: white;">삭제</button>
+                            </div>
                         `;
                         pendingUsersDiv.appendChild(userDiv);
                     }
                 }
                 
                 if (!hasPending) {
-                    pendingUsersDiv.innerHTML = '<p>대기 중인 사용자가 없습니다.</p>';
+                    pendingUsersDiv.innerHTML = '<p style="text-align: center; padding: 20px;">대기 중인 사용자가 없습니다.</p>';
+                }
+            } catch (error) {
+                console.error('사용자 목록 로드 오류:', error);
+                alert('사용자 목록을 불러오는데 실패했습니다.');
+            }
+        };
+        
+        // 전체 사용자 표시
+        window.showAllUsers = async function() {
+            const pendingUsersDiv = document.getElementById('pendingUsers');
+            
+            try {
+                const usersRef = ref(database, 'users');
+                const snapshot = await get(usersRef);
+                
+                pendingUsersDiv.innerHTML = '<p style="text-align: center; padding: 20px;">로딩 중...</p>';
+                
+                if (!snapshot.exists()) {
+                    pendingUsersDiv.innerHTML = '<p style="text-align: center; padding: 20px;">사용자가 없습니다.</p>';
+                    return;
                 }
                 
-                modal.classList.add('show');
+                const users = snapshot.val();
+                pendingUsersDiv.innerHTML = '';
+                
+                for (const [userId, user] of Object.entries(users)) {
+                    if (user.name === 'admin') continue; // admin은 제외
+                    
+                    const userDiv = document.createElement('div');
+                    userDiv.className = 'pending-user';
+                    const approvedBadge = user.approved ? '<span style="color: green; font-weight: bold;">✓ 승인됨</span>' : '<span style="color: orange;">대기 중</span>';
+                    userDiv.innerHTML = `
+                        <div class="user-details">
+                            <strong>이름:</strong> ${user.name}<br>
+                            <strong>생년월일:</strong> ${user.birthdate || '없음'}<br>
+                            <strong>핸드폰:</strong> ${user.phone || '없음'}<br>
+                            <strong>가입일:</strong> ${user.createdAt ? new Date(user.createdAt).toLocaleDateString('ko-KR') : '없음'}<br>
+                            <strong>상태:</strong> ${approvedBadge}
+                        </div>
+                        <div style="display: flex; gap: 5px; flex-direction: column;">
+                            ${!user.approved ? `<button class="btn btn-pink" onclick="approveUser('${userId}')">승인</button>` : ''}
+                            <button class="btn" onclick="editUser('${userId}')" style="background: #ffb6c1;">수정</button>
+                            <button class="btn" onclick="deleteUser('${userId}')" style="background: #ff6b6b; color: white;">삭제</button>
+                        </div>
+                    `;
+                    pendingUsersDiv.appendChild(userDiv);
+                }
+                
+                if (pendingUsersDiv.children.length === 0) {
+                    pendingUsersDiv.innerHTML = '<p style="text-align: center; padding: 20px;">사용자가 없습니다.</p>';
+                }
             } catch (error) {
                 console.error('사용자 목록 로드 오류:', error);
                 alert('사용자 목록을 불러오는데 실패했습니다.');
@@ -2563,13 +2678,171 @@
         // 사용자 승인
         window.approveUser = async function(userId) {
             try {
-                const userRef = ref(database, `users/${userId}`);
                 await set(ref(database, `users/${userId}/approved`), true);
                 alert('승인되었습니다!');
-                openApproveModal(); // 목록 새로고침
+                showPendingUsers(); // 목록 새로고침
             } catch (error) {
                 console.error('승인 오류:', error);
                 alert('승인에 실패했습니다.');
+            }
+        };
+        
+        // 사용자 수정 모달 열기
+        window.editUser = async function(userId) {
+            try {
+                const userRef = ref(database, `users/${userId}`);
+                const snapshot = await get(userRef);
+                
+                if (!snapshot.exists()) {
+                    alert('사용자를 찾을 수 없습니다.');
+                    return;
+                }
+                
+                const user = snapshot.val();
+                document.getElementById('editUserId').value = userId;
+                document.getElementById('editUserName').value = user.name || '';
+                document.getElementById('editUserBirthdate').value = user.birthdate || '';
+                document.getElementById('editUserPhone').value = user.phone || '';
+                
+                const editModal = document.getElementById('editUserModal');
+                editModal.classList.add('show');
+            } catch (error) {
+                console.error('사용자 정보 로드 오류:', error);
+                alert('사용자 정보를 불러오는데 실패했습니다.');
+            }
+        };
+        
+        // 사용자 정보 저장
+        window.saveUserEdit = async function(event) {
+            event.preventDefault();
+            
+            const userId = document.getElementById('editUserId').value;
+            const name = document.getElementById('editUserName').value.trim();
+            const birthdate = document.getElementById('editUserBirthdate').value;
+            const phone = document.getElementById('editUserPhone').value.trim();
+            
+            if (!name) {
+                alert('이름을 입력해주세요.');
+                return;
+            }
+            
+            try {
+                // 이름 중복 체크 (본인 제외)
+                const usersRef = ref(database, 'users');
+                const snapshot = await get(usersRef);
+                
+                if (snapshot.exists()) {
+                    const users = snapshot.val();
+                    for (const [uid, user] of Object.entries(users)) {
+                        if (uid !== userId && user.name === name) {
+                            alert('이미 사용 중인 이름입니다.');
+                            return;
+                        }
+                    }
+                }
+                
+                // 사용자 정보 업데이트
+                const userRef = ref(database, `users/${userId}`);
+                const currentUser = (await get(userRef)).val();
+                
+                const updates = {
+                    name: name,
+                    birthdate: birthdate || currentUser.birthdate || '',
+                    phone: phone || currentUser.phone || ''
+                };
+                
+                await update(userRef, updates);
+                
+                alert('사용자 정보가 수정되었습니다.');
+                closeEditUserModal();
+                
+                // 현재 표시 중인 목록 새로고침
+                const pendingUsersDiv = document.getElementById('pendingUsers');
+                if (pendingUsersDiv.innerHTML.includes('대기 중인')) {
+                    showPendingUsers();
+                } else {
+                    showAllUsers();
+                }
+            } catch (error) {
+                console.error('사용자 정보 수정 오류:', error);
+                alert('사용자 정보 수정에 실패했습니다.');
+            }
+        };
+        
+        // 사용자 수정 모달 닫기
+        window.closeEditUserModal = function() {
+            document.getElementById('editUserModal').classList.remove('show');
+        };
+        
+        // 사용자 삭제
+        window.deleteUser = async function(userId) {
+            if (!confirm('정말 이 사용자를 삭제하시겠습니까?\n이 사용자가 작성한 모든 글과 댓글이 함께 삭제됩니다.')) {
+                return;
+            }
+            
+            try {
+                // 사용자 정보 확인
+                const userRef = ref(database, `users/${userId}`);
+                const userSnapshot = await get(userRef);
+                
+                if (!userSnapshot.exists()) {
+                    alert('사용자를 찾을 수 없습니다.');
+                    return;
+                }
+                
+                const userName = userSnapshot.val().name;
+                
+                // 사용자가 작성한 모든 글 삭제
+                const postsRef = ref(database, 'posts');
+                const postsSnapshot = await get(postsRef);
+                
+                if (postsSnapshot.exists()) {
+                    const posts = postsSnapshot.val();
+                    for (const [tabName, tabPosts] of Object.entries(posts)) {
+                        if (tabPosts) {
+                            for (const [postId, post] of Object.entries(tabPosts)) {
+                                if (post.author === userName) {
+                                    const postRef = ref(database, `posts/${tabName}/${postId}`);
+                                    
+                                    // 일상로그인 경우 Storage에서 미디어 파일 삭제
+                                    if (tabName === 'daily' && post.media && post.media.length > 0) {
+                                        for (const media of post.media) {
+                                            try {
+                                                const url = media.url;
+                                                const pathMatch = url.match(/daily%2F([^?]+)/);
+                                                if (pathMatch) {
+                                                    const filePath = `daily/${decodeURIComponent(pathMatch[1])}`;
+                                                    const mediaStorageRef = storageRef(storage, filePath);
+                                                    await deleteObject(mediaStorageRef);
+                                                }
+                                            } catch (error) {
+                                                console.error('미디어 파일 삭제 오류:', error);
+                                            }
+                                        }
+                                    }
+                                    
+                                    await remove(postRef);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // 사용자 삭제
+                await remove(userRef);
+                
+                alert('사용자가 삭제되었습니다.');
+                
+                // 목록 새로고침
+                const pendingUsersDiv = document.getElementById('pendingUsers');
+                if (pendingUsersDiv.innerHTML.includes('대기 중인')) {
+                    showPendingUsers();
+                } else {
+                    showAllUsers();
+                }
+            } catch (error) {
+                console.error('사용자 삭제 오류:', error);
+                alert('사용자 삭제에 실패했습니다.');
             }
         };
         
@@ -2577,6 +2850,12 @@
         document.getElementById('approveModal').addEventListener('click', (e) => {
             if (e.target.id === 'approveModal') {
                 document.getElementById('approveModal').classList.remove('show');
+            }
+        });
+        
+        document.getElementById('editUserModal').addEventListener('click', (e) => {
+            if (e.target.id === 'editUserModal') {
+                closeEditUserModal();
             }
         });
         

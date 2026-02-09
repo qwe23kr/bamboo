@@ -73,12 +73,12 @@ exports.onPostCreated = onValueCreated(
               tab: tabName,
               postId: postId,
             },
-          webpush: {
-            notification: {
-              icon: "/bamboo/icon-192.png",
-              badge: "/bamboo/icon-192.png",
+            webpush: {
+              notification: {
+                icon: "/bamboo/icon-192.png",
+                badge: "/bamboo/icon-192.png",
+              },
             },
-          },
           });
         }
 
@@ -89,7 +89,11 @@ exports.onPostCreated = onValueCreated(
           for (let i = 0; i < messages.length; i += batchSize) {
             const batch = messages.slice(i, i + batchSize);
             const result = await admin.messaging().sendEach(batch);
-            console.log(`배치 ${i / batchSize + 1} 전송 완료: 성공 ${result.successCount}개, 실패 ${result.failureCount}개`);
+            const batchNum = i / batchSize + 1;
+            console.log(
+                `배치 ${batchNum} 전송 완료: ` +
+                `성공 ${result.successCount}개, 실패 ${result.failureCount}개`,
+            );
             if (result.failureCount > 0) {
               result.responses.forEach((resp, idx) => {
                 if (!resp.success) {
@@ -100,7 +104,7 @@ exports.onPostCreated = onValueCreated(
           }
           console.log(`✅ 총 ${messages.length}명에게 알림 전송 완료`);
         } else {
-          console.log('⚠️ 알림을 받을 사용자가 없습니다.');
+          console.log("⚠️ 알림을 받을 사용자가 없습니다.");
         }
 
         return null;
@@ -164,12 +168,12 @@ exports.onEventCreated = onValueCreated(
               type: "event",
               eventId: eventId,
             },
-          webpush: {
-            notification: {
-              icon: "/bamboo/icon-192.png",
-              badge: "/bamboo/icon-192.png",
+            webpush: {
+              notification: {
+                icon: "/bamboo/icon-192.png",
+                badge: "/bamboo/icon-192.png",
+              },
             },
-          },
           });
         }
 
@@ -180,7 +184,11 @@ exports.onEventCreated = onValueCreated(
           for (let i = 0; i < messages.length; i += batchSize) {
             const batch = messages.slice(i, i + batchSize);
             const result = await admin.messaging().sendEach(batch);
-            console.log(`배치 ${i / batchSize + 1} 전송 완료: 성공 ${result.successCount}개, 실패 ${result.failureCount}개`);
+            const batchNum = i / batchSize + 1;
+            console.log(
+                `배치 ${batchNum} 전송 완료: ` +
+                `성공 ${result.successCount}개, 실패 ${result.failureCount}개`,
+            );
             if (result.failureCount > 0) {
               result.responses.forEach((resp, idx) => {
                 if (!resp.success) {
@@ -191,7 +199,7 @@ exports.onEventCreated = onValueCreated(
           }
           console.log(`✅ 총 ${messages.length}명에게 알림 전송 완료`);
         } else {
-          console.log('⚠️ 알림을 받을 사용자가 없습니다.');
+          console.log("⚠️ 알림을 받을 사용자가 없습니다.");
         }
 
         return null;
