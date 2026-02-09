@@ -1413,6 +1413,22 @@
         // 현재 탭
         window.currentTab = 'praise';
         
+        // 로그아웃 함수 (먼저 정의)
+        window.logout = function() {
+            localStorage.removeItem('bamboo_userId');
+            localStorage.removeItem('bamboo_userName');
+            localStorage.removeItem('bamboo_isAdmin');
+            window.location.href = 'login.html';
+        };
+        
+        // 로그아웃 버튼 이벤트 리스너
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', logout);
+            }
+        });
+        
         // 사용자 정보 로드
         function loadUserInfo() {
             const userId = localStorage.getItem('bamboo_userId');
