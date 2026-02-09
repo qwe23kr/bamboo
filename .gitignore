@@ -1,0 +1,19 @@
+# Firebase 설정 파일 (보안상 제외)
+firebase-config.js
+
+# 로그 파일
+*.log
+
+# 운영체제 파일
+.DS_Store
+Thumbs.db
+
+# 에디터 설정
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node modules (사용하는 경우)
+node_modules/
+

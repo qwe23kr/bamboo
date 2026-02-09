@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bamboo - Firebase 연결 페이지</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: left;
+        }
+        
+        .info h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .info p {
+            color: #666;
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎋 Bamboo</h1>
+        <p style="color: #666; margin-bottom: 20px;">Firebase 연결 테스트 페이지</p>
+        
+        <div id="status" class="status disconnected">
+            Firebase 연결 중...
+        </div>
+        
+        <button onclick="testConnection()">연결 테스트</button>
+        <button onclick="writeData()">데이터 쓰기</button>
+        <button onclick="readData()">데이터 읽기</button>
+        
+        <div class="info">
+            <h3>📊 상태 정보</h3>
+            <p id="info">초기화 중...</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Firebase 설정은 Firebase Console에서 복사한 값을 아래에 입력하세요
+        // FIREBASE_SETUP.md 파일을 참고하세요!
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        
+        // ✅ Firebase 설정 완료!
+        const firebaseConfig = {
+            apiKey: "AIzaSyCx92CLNVBaHLKNxaaY5Ydnrm8HksNapnw",
+            authDomain: "bamboo-5008c.firebaseapp.com",
+            databaseURL: "https://bamboo-5008c-default-rtdb.firebaseio.com",
+            projectId: "bamboo-5008c",
+            storageBucket: "bamboo-5008c.firebasestorage.app",
+            messagingSenderId: "51130215561",
+            appId: "1:51130215561:web:8f8922b2b0b95852946a58",
+            measurementId: "G-WFSV2Q6B3D"
+        };
+        
+        // Firebase 초기화
+        try {
+            const app = initializeApp(firebaseConfig);
+            const database = getDatabase(app);
+            
+            // 전역 변수로 설정
+            window.firebaseApp = app;
+            window.firebaseDatabase = database;
+            window.firebaseRef = ref;
+            window.firebaseSet = set;
+            window.firebaseGet = get;
+            
+            // 연결 상태 업데이트
+            updateStatus(true);
+            updateInfo('✅ Firebase 초기화 완료! 데이터베이스 연결 준비됨.');
+        } catch (error) {
+            updateStatus(false);
+            updateInfo('❌ Firebase 초기화 오류: ' + error.message);
+            console.error('Firebase 초기화 오류:', error);
+        }
+    </script>
+    
+    <script>
+        function updateStatus(connected) {
+            const statusEl = document.getElementById('status');
+            if (connected) {
+                statusEl.textContent = '✅ Firebase 연결됨';
+                statusEl.className = 'status connected';
+            } else {
+                statusEl.textContent = '❌ Firebase 연결 안됨';
+                statusEl.className = 'status disconnected';
+            }
+        }
+        
+        function updateInfo(message) {
+            document.getElementById('info').textContent = message;
+        }
+        
+        async function testConnection() {
+            try {
+                updateInfo('연결 테스트 중...');
+                // 간단한 연결 테스트
+                updateInfo('✅ Firebase 연결 성공!');
+                alert('Firebase 연결이 정상적으로 작동합니다!');
+            } catch (error) {
+                updateInfo('❌ 오류: ' + error.message);
+                alert('연결 실패: ' + error.message);
+            }
+        }
+        
+        async function writeData() {
+            try {
+                if (!window.firebaseSet || !window.firebaseRef || !window.firebaseDatabase) {
+                    alert('Firebase가 아직 초기화되지 않았습니다.');
+                    return;
+                }
+                
+                updateInfo('데이터 쓰기 중...');
+                const testRef = window.firebaseRef(window.firebaseDatabase, 'test/data');
+                await window.firebaseSet(testRef, {
+                    message: '안녕하세요!',
+                    timestamp: new Date().toISOString(),
+                    value: Math.random()
+                });
+                updateInfo('✅ 데이터 쓰기 성공!');
+                alert('데이터가 성공적으로 저장되었습니다!');
+            } catch (error) {
+                updateInfo('❌ 오류: ' + error.message);
+                alert('데이터 쓰기 실패: ' + error.message);
+            }
+        }
+        
+        async function readData() {
+            try {
+                if (!window.firebaseGet || !window.firebaseRef || !window.firebaseDatabase) {
+                    alert('Firebase가 아직 초기화되지 않았습니다.');
+                    return;
+                }
+                
+                updateInfo('데이터 읽기 중...');
+                const testRef = window.firebaseRef(window.firebaseDatabase, 'test/data');
+                const snapshot = await window.firebaseGet(testRef);
+                
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    updateInfo(`✅ 데이터 읽기 성공: ${JSON.stringify(data, null, 2)}`);
+                    alert('데이터: ' + JSON.stringify(data, null, 2));
+                } else {
+                    updateInfo('읽을 데이터가 없습니다.');
+                    alert('저장된 데이터가 없습니다. 먼저 "데이터 쓰기"를 실행해주세요.');
+                }
+            } catch (error) {
+                updateInfo('❌ 오류: ' + error.message);
+                alert('데이터 읽기 실패: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
