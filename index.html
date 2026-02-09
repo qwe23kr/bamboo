@@ -2859,6 +2859,24 @@
             }
         });
         
+        // FCM 토큰 재시도
+        window.retryFCMToken = async function() {
+            if (!('Notification' in window)) {
+                alert('이 브라우저는 알림을 지원하지 않습니다.');
+                return;
+            }
+            
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                alert('알림 권한이 필요합니다. 브라우저 설정에서 알림을 허용해주세요.');
+                return;
+            }
+            
+            alert('FCM 토큰을 다시 저장합니다...');
+            await initializePushNotifications();
+            alert('FCM 토큰 저장이 완료되었습니다. 브라우저 콘솔(F12)에서 확인하세요.');
+        };
+        
         // 로그아웃
         window.logout = function() {
             localStorage.removeItem('bamboo_userId');
@@ -3025,16 +3043,30 @@
                         const userId = localStorage.getItem('bamboo_userId');
                         if (userName && userId) {
                             const tokenRef = ref(database, `users/${userId}/fcmToken`);
+                            
+                            // 기존 토큰 확인
+                            const existingToken = await get(tokenRef);
+                            if (existingToken.exists() && existingToken.val() === token) {
+                                console.log('✅ FCM 토큰이 이미 저장되어 있습니다.');
+                                return;
+                            }
+                            
                             await set(tokenRef, token);
                             console.log('💾 FCM 토큰 저장 시도 완료');
                             
-                            // 저장 확인
-                            const savedToken = await get(tokenRef);
-                            if (savedToken.val() === token) {
-                                console.log('✅ FCM 토큰 저장 확인 완료');
-                            } else {
-                                console.error('❌ FCM 토큰 저장 실패 - 저장된 값이 다릅니다.');
+                            // 저장 확인 (재시도 포함)
+                            let retries = 3;
+                            while (retries > 0) {
+                                await new Promise(resolve => setTimeout(resolve, 500));
+                                const savedToken = await get(tokenRef);
+                                if (savedToken.exists() && savedToken.val() === token) {
+                                    console.log('✅ FCM 토큰 저장 확인 완료');
+                                    console.log('📱 전체 토큰:', token);
+                                    return;
+                                }
+                                retries--;
                             }
+                            console.error('❌ FCM 토큰 저장 확인 실패 - 저장된 값이 다릅니다.');
                         } else {
                             console.warn('⚠️ 사용자 정보가 없어 FCM 토큰을 저장할 수 없습니다.');
                             console.log('userId:', userId, 'userName:', userName);
@@ -3042,6 +3074,7 @@
                     } else {
                         console.error('❌ FCM 토큰을 가져올 수 없습니다.');
                         console.log('알림 권한 상태:', permission);
+                        console.log('VAPID 키 확인 필요');
                     }
                     
                     // 포그라운드 메시지 수신
@@ -3132,13 +3165,34 @@
         }
         
         // 로그인 후 푸시 알림 초기화
-        setTimeout(() => {
+        async function initNotifications() {
             const userId = localStorage.getItem('bamboo_userId');
             if (userId) {
-                initializePushNotifications();
+                // FCM 토큰이 있는지 확인
+                const tokenRef = ref(database, `users/${userId}/fcmToken`);
+                const tokenSnapshot = await get(tokenRef);
+                
+                if (!tokenSnapshot.exists() || !tokenSnapshot.val()) {
+                    console.log('🔄 FCM 토큰이 없어서 다시 초기화합니다...');
+                    await initializePushNotifications();
+                } else {
+                    console.log('✅ FCM 토큰이 이미 저장되어 있습니다.');
+                }
+                
                 setupNotificationListener();
             }
+        }
+        
+        // 즉시 실행 및 3초 후 재시도
+        initNotifications();
+        setTimeout(() => {
+            initNotifications();
         }, 3000);
+        
+        // 페이지 포커스 시에도 재시도
+        window.addEventListener('focus', () => {
+            initNotifications();
+        });
         
     </script>
 </body>
