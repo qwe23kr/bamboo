@@ -311,6 +311,113 @@
             border-radius: 10px;
         }
         
+        /* 이미지 슬라이드 스타일 */
+        .post-media-slider {
+            position: relative;
+            margin: 15px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            touch-action: pan-y;
+        }
+        
+        .post-media-slider-container {
+            display: flex;
+            transition: transform 0.3s ease;
+            will-change: transform;
+            cursor: grab;
+        }
+        
+        .post-media-slider-container:active {
+            cursor: grabbing;
+        }
+        
+        .post-media-slider-item {
+            min-width: 100%;
+            flex-shrink: 0;
+            position: relative;
+        }
+        
+        .post-media-slider-item img,
+        .post-media-slider-item video {
+            width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+            display: block;
+        }
+        
+        .post-media-slider-indicators {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+        }
+        
+        .post-media-slider-indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .post-media-slider-indicator.active {
+            background: rgba(255, 255, 255, 1);
+            width: 20px;
+            border-radius: 3px;
+        }
+        
+        .post-media-slider-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: background 0.3s ease;
+        }
+        
+        .post-media-slider-nav:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        .post-media-slider-nav.prev {
+            left: 10px;
+        }
+        
+        .post-media-slider-nav.next {
+            right: 10px;
+        }
+        
+        .post-media-slider-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .post-media-slider-counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            z-index: 10;
+        }
+        
         .write-section {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
@@ -1712,7 +1819,12 @@
             const titleInput = document.getElementById('eventTitle');
             const descInput = document.getElementById('eventDescription');
             
-            dateInput.value = date.toISOString().split('T')[0];
+            // 로컬 날짜를 YYYY-MM-DD 형식으로 변환
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            dateInput.value = `${year}-${month}-${day}`;
+            
             titleInput.value = '';
             descInput.value = '';
             
@@ -1860,6 +1972,7 @@
             }
             
             let mediaHTML = '';
+            let sliderId = null;
             if (post.media && post.media.length > 0) {
                 if (post.media.length === 1) {
                     if (post.media[0].type === 'video') {
@@ -1868,14 +1981,28 @@
                         mediaHTML = `<div class="post-media"><img src="${post.media[0].url}" alt="이미지"></div>`;
                     }
                 } else {
-                    mediaHTML = '<div class="post-media-grid">';
-                    post.media.forEach(media => {
+                    // 여러 이미지일 때 슬라이드로 표시
+                    sliderId = `slider-${tabName}-${postId}`;
+                    mediaHTML = `<div class="post-media-slider" id="${sliderId}">`;
+                    mediaHTML += '<div class="post-media-slider-container">';
+                    post.media.forEach((media, index) => {
                         if (media.type === 'video') {
-                            mediaHTML += `<video controls><source src="${media.url}" type="video/mp4"></video>`;
+                            mediaHTML += `<div class="post-media-slider-item"><video controls><source src="${media.url}" type="video/mp4"></video></div>`;
                         } else {
-                            mediaHTML += `<img src="${media.url}" alt="이미지">`;
+                            mediaHTML += `<div class="post-media-slider-item"><img src="${media.url}" alt="이미지 ${index + 1}"></div>`;
                         }
                     });
+                    mediaHTML += '</div>';
+                    mediaHTML += '<div class="post-media-slider-indicators">';
+                    post.media.forEach((_, index) => {
+                        mediaHTML += `<span class="post-media-slider-indicator ${index === 0 ? 'active' : ''}" data-index="${index}"></span>`;
+                    });
+                    mediaHTML += '</div>';
+                    mediaHTML += `<div class="post-media-slider-counter">1 / ${post.media.length}</div>`;
+                    if (post.media.length > 1) {
+                        mediaHTML += '<button class="post-media-slider-nav prev" onclick="slideMedia(\'' + sliderId + '\', -1)">‹</button>';
+                        mediaHTML += '<button class="post-media-slider-nav next" onclick="slideMedia(\'' + sliderId + '\', 1)">›</button>';
+                    }
                     mediaHTML += '</div>';
                 }
             }
@@ -1907,10 +2034,183 @@
             // setTimeout을 사용하여 DOM이 완전히 렌더링된 후 댓글 로드
             setTimeout(() => {
                 loadComments(postId, tabName);
+                
+                // 슬라이드 초기화 (여러 이미지가 있는 경우)
+                if (sliderId && post.media && post.media.length > 1) {
+                    initMediaSlider(sliderId, post.media.length);
+                }
             }, 0);
             
             return postDiv;
         }
+        
+        // 미디어 슬라이드 초기화
+        function initMediaSlider(sliderId, totalItems) {
+            const slider = document.getElementById(sliderId);
+            if (!slider) return;
+            
+            const container = slider.querySelector('.post-media-slider-container');
+            const indicators = slider.querySelectorAll('.post-media-slider-indicator');
+            const counter = slider.querySelector('.post-media-slider-counter');
+            const prevBtn = slider.querySelector('.post-media-slider-nav.prev');
+            const nextBtn = slider.querySelector('.post-media-slider-nav.next');
+            
+            let currentIndex = 0;
+            let startX = 0;
+            let currentX = 0;
+            let isDragging = false;
+            
+            // 슬라이드 이동 함수
+            function goToSlide(index) {
+                if (index < 0 || index >= totalItems) return;
+                
+                currentIndex = index;
+                container.style.transform = `translateX(-${currentIndex * 100}%)`;
+                
+                // 인디케이터 업데이트
+                indicators.forEach((indicator, i) => {
+                    indicator.classList.toggle('active', i === currentIndex);
+                });
+                
+                // 카운터 업데이트
+                if (counter) {
+                    counter.textContent = `${currentIndex + 1} / ${totalItems}`;
+                }
+                
+                // 버튼 상태 업데이트
+                if (prevBtn) prevBtn.disabled = currentIndex === 0;
+                if (nextBtn) nextBtn.disabled = currentIndex === totalItems - 1;
+            }
+            
+            // 버튼 클릭 이벤트
+            if (prevBtn) {
+                prevBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    goToSlide(currentIndex - 1);
+                });
+            }
+            
+            if (nextBtn) {
+                nextBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    goToSlide(currentIndex + 1);
+                });
+            }
+            
+            // 인디케이터 클릭 이벤트
+            indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    goToSlide(index);
+                });
+            });
+            
+            // 터치 이벤트 (모바일)
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            container.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                isDragging = true;
+            }, { passive: true });
+            
+            container.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                touchEndX = e.touches[0].clientX;
+            }, { passive: true });
+            
+            container.addEventListener('touchend', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                
+                const diff = touchStartX - touchEndX;
+                const threshold = 50; // 최소 스와이프 거리
+                
+                if (Math.abs(diff) > threshold) {
+                    if (diff > 0 && currentIndex < totalItems - 1) {
+                        // 왼쪽으로 스와이프 (다음)
+                        goToSlide(currentIndex + 1);
+                    } else if (diff < 0 && currentIndex > 0) {
+                        // 오른쪽으로 스와이프 (이전)
+                        goToSlide(currentIndex - 1);
+                    }
+                }
+            }, { passive: true });
+            
+            // 마우스 드래그 이벤트 (데스크톱)
+            container.addEventListener('mousedown', (e) => {
+                startX = e.clientX;
+                isDragging = true;
+                container.style.cursor = 'grabbing';
+            });
+            
+            container.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                currentX = e.clientX;
+            });
+            
+            container.addEventListener('mouseup', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                container.style.cursor = 'grab';
+                
+                const diff = startX - currentX;
+                const threshold = 50;
+                
+                if (Math.abs(diff) > threshold) {
+                    if (diff > 0 && currentIndex < totalItems - 1) {
+                        goToSlide(currentIndex + 1);
+                    } else if (diff < 0 && currentIndex > 0) {
+                        goToSlide(currentIndex - 1);
+                    }
+                }
+            });
+            
+            container.addEventListener('mouseleave', () => {
+                isDragging = false;
+                container.style.cursor = 'grab';
+            });
+            
+            // 초기 상태 설정
+            goToSlide(0);
+        }
+        
+        // 슬라이드 이동 함수 (버튼용)
+        window.slideMedia = function(sliderId, direction) {
+            const slider = document.getElementById(sliderId);
+            if (!slider) return;
+            
+            const container = slider.querySelector('.post-media-slider-container');
+            const indicators = slider.querySelectorAll('.post-media-slider-indicator');
+            const counter = slider.querySelector('.post-media-slider-counter');
+            const totalItems = indicators.length;
+            
+            let currentIndex = 0;
+            indicators.forEach((indicator, index) => {
+                if (indicator.classList.contains('active')) {
+                    currentIndex = index;
+                }
+            });
+            
+            const newIndex = currentIndex + direction;
+            if (newIndex < 0 || newIndex >= totalItems) return;
+            
+            container.style.transform = `translateX(-${newIndex * 100}%)`;
+            
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === newIndex);
+            });
+            
+            if (counter) {
+                counter.textContent = `${newIndex + 1} / ${totalItems}`;
+            }
+            
+            const prevBtn = slider.querySelector('.post-media-slider-nav.prev');
+            const nextBtn = slider.querySelector('.post-media-slider-nav.next');
+            if (prevBtn) prevBtn.disabled = newIndex === 0;
+            if (nextBtn) nextBtn.disabled = newIndex === totalItems - 1;
+        };
         
         // 댓글 로드 (리스너 관리용)
         const commentListeners = new Map();
@@ -2099,7 +2399,7 @@
                 const reader = new FileReader();
                 reader.onerror = reject;
                 reader.onload = (e) => {
-                    const img = new Image();
+const img = new Image();
                     img.onerror = reject;
                     img.onload = () => {
                         try {
@@ -2143,6 +2443,139 @@
             });
         }
         
+        // 동영상 압축 (해상도 및 비트레이트 조정)
+        function compressVideo(file, maxWidth = 1280, maxHeight = 720, bitrate = 2000000) {
+            return new Promise((resolve, reject) => {
+                const video = document.createElement('video');
+                video.preload = 'metadata';
+                video.muted = true; // 음소거해야 재생 가능
+                video.playsInline = true;
+                
+                const videoUrl = URL.createObjectURL(file);
+                video.src = videoUrl;
+                
+                video.onloadedmetadata = () => {
+                    try {
+                        // 비율 유지하면서 크기 조정
+                        let width = video.videoWidth;
+                        let height = video.videoHeight;
+                        const aspectRatio = width / height;
+                        
+                        if (width > maxWidth || height > maxHeight) {
+                            if (width > height) {
+                                width = Math.min(width, maxWidth);
+                                height = width / aspectRatio;
+                                if (height > maxHeight) {
+                                    height = maxHeight;
+                                    width = height * aspectRatio;
+                                }
+                            } else {
+                                height = Math.min(height, maxHeight);
+                                width = height * aspectRatio;
+                                if (width > maxWidth) {
+                                    width = maxWidth;
+                                    height = width / aspectRatio;
+                                }
+                            }
+                        }
+                        
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Canvas 스트림 생성
+                        const stream = canvas.captureStream(30); // 30fps
+                        
+                        // 지원되는 MIME 타입 확인
+                        let mimeType = 'video/webm;codecs=vp9';
+                        if (!MediaRecorder.isTypeSupported(mimeType)) {
+                            mimeType = 'video/webm;codecs=vp8';
+                            if (!MediaRecorder.isTypeSupported(mimeType)) {
+                                mimeType = 'video/webm';
+                                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                                    // 압축 불가능하면 원본 반환
+                                    URL.revokeObjectURL(videoUrl);
+                                    resolve(file);
+                                    return;
+                                }
+                            }
+                        }
+                        
+                        const mediaRecorder = new MediaRecorder(stream, {
+                            mimeType: mimeType,
+                            videoBitsPerSecond: bitrate
+                        });
+                        
+                        const chunks = [];
+                        
+                        mediaRecorder.ondataavailable = (e) => {
+                            if (e.data && e.data.size > 0) {
+                                chunks.push(e.data);
+                            }
+                        };
+                        
+                        mediaRecorder.onstop = () => {
+                            URL.revokeObjectURL(videoUrl);
+                            const blob = new Blob(chunks, { type: mimeType });
+                            
+                            // 압축된 파일이 원본보다 작으면 사용, 아니면 원본 사용
+                            if (blob.size > 0 && blob.size < file.size * 0.9) {
+                                resolve(blob);
+                            } else {
+                                resolve(file);
+                            }
+                        };
+                        
+                        mediaRecorder.onerror = (e) => {
+                            URL.revokeObjectURL(videoUrl);
+                            reject(new Error('동영상 압축 중 오류 발생'));
+                        };
+                        
+                        video.oncanplay = () => {
+                            mediaRecorder.start();
+                            
+                            const drawFrame = () => {
+                                if (video.ended || video.paused) {
+                                    if (mediaRecorder.state === 'recording') {
+                                        mediaRecorder.stop();
+                                    }
+                                    return;
+                                }
+                                
+                                ctx.drawImage(video, 0, 0, width, height);
+                                
+                                if (!video.ended && !video.paused) {
+                                    requestAnimationFrame(drawFrame);
+                                }
+                            };
+                            
+                            video.currentTime = 0;
+                            video.play().then(() => {
+                                drawFrame();
+                            }).catch((err) => {
+                                URL.revokeObjectURL(videoUrl);
+                                reject(new Error('동영상 재생 실패'));
+                            });
+                        };
+                        
+                        video.onerror = () => {
+                            URL.revokeObjectURL(videoUrl);
+                            reject(new Error('동영상 로드 실패'));
+                        };
+                    } catch (error) {
+                        URL.revokeObjectURL(videoUrl);
+                        reject(error);
+                    }
+                };
+                
+                video.onerror = () => {
+                    URL.revokeObjectURL(videoUrl);
+                    reject(new Error('동영상 로드 실패'));
+                };
+            });
+        }
+        
         // 미디어 선택 처리
         window.handleMediaSelect = async function(event) {
             try {
@@ -2180,14 +2613,31 @@
                     let processedFile = file;
                     let previewUrl = URL.createObjectURL(file);
                     
-                // 이미지인 경우 압축 (300KB 이상이면 압축)
-                if (isImage && file.size > 300 * 1024) {
+                    // 이미지인 경우 압축 (300KB 이상이면 압축)
+                    if (isImage && file.size > 300 * 1024) {
                         try {
                             processedFile = await compressImage(file);
                             URL.revokeObjectURL(previewUrl); // 이전 URL 해제
                             previewUrl = URL.createObjectURL(processedFile);
                         } catch (compressError) {
                             // 압축 실패 시 원본 파일 사용
+                            console.warn('이미지 압축 실패:', compressError);
+                        }
+                    }
+                    
+                    // 동영상인 경우 압축 (10MB 이상이면 압축 시도)
+                    if (isVideo && file.size > 10 * 1024 * 1024) {
+                        try {
+                            // 동영상 압축은 시간이 걸릴 수 있으므로 사용자에게 알림
+                            const compressedVideo = await compressVideo(file);
+                            if (compressedVideo && compressedVideo.size < file.size) {
+                                URL.revokeObjectURL(previewUrl);
+                                processedFile = compressedVideo;
+                                previewUrl = URL.createObjectURL(processedFile);
+                            }
+                        } catch (compressError) {
+                            // 압축 실패 시 원본 파일 사용
+                            console.warn('동영상 압축 실패:', compressError);
                         }
                     }
                     

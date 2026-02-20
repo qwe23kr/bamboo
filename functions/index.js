@@ -157,6 +157,152 @@ exports.onPostCreated = onValueCreated(
 );
 
 /**
+ * 댓글 작성 시 알림 전송 (모든 사용자에게)
+ */
+exports.onCommentCreated = onValueCreated(
+    {
+      ref: "/posts/{tabName}/{postId}/comments/{commentId}",
+      region: "us-central1",
+    },
+    async (event) => {
+      const comment = event.data.val();
+      const {tabName, postId, commentId} = event.params;
+
+      // 댓글 작성자
+      const commentAuthor = comment.author;
+      if (!commentAuthor) {
+        return null;
+      }
+
+      try {
+        // 글 정보 가져오기
+        const postRef = admin.database().ref(`posts/${tabName}/${postId}`);
+        const postSnapshot = await postRef.once("value");
+        const post = postSnapshot.val();
+
+        if (!post || !post.author) {
+          return null;
+        }
+
+        // 모든 사용자의 FCM 토큰 가져오기
+        const usersSnapshot = await admin
+            .database()
+            .ref("users")
+            .once("value");
+        const users = usersSnapshot.val();
+
+        if (!users) return null;
+
+        const messages = [];
+        const failedTokens = [];
+
+        // 각 사용자에게 알림 메시지 생성
+        for (const [userId, user] of Object.entries(users)) {
+          // 댓글 작성자 본인은 제외
+          if (user.name === commentAuthor) {
+            continue;
+          }
+
+          // admin 사용자는 자동으로 승인된 것으로 처리
+          const isApproved = user.approved === true ||
+            userId === "admin" ||
+            user.name === "admin";
+          if (!isApproved) {
+            continue;
+          }
+
+          if (!user.fcmToken) {
+            continue;
+          }
+
+          messages.push({
+            token: user.fcmToken,
+            notification: {
+              title: "새 댓글이 달렸습니다",
+              body: `${commentAuthor}님이 ` +
+                `${tabNames[tabName] || tabName}에 댓글을 남겼습니다.`,
+            },
+            data: {
+              type: "comment",
+              tab: tabName,
+              postId: postId,
+              commentId: commentId,
+            },
+            webpush: {
+              notification: {
+                title: "새 댓글이 달렸습니다",
+                body: `${commentAuthor}님이 ` +
+                  `${tabNames[tabName] || tabName}에 댓글을 남겼습니다.`,
+                icon: "/bamboo/icon-192.png",
+                badge: "/bamboo/icon-192.png",
+              },
+              fcmOptions: {
+                link: `/bamboo/index.html#${tabName}`,
+              },
+            },
+          });
+        }
+
+        // 알림 전송 (100개씩 배치로 전송)
+        if (messages.length > 0) {
+          const batchSize = 100;
+          for (let i = 0; i < messages.length; i += batchSize) {
+            const batch = messages.slice(i, i + batchSize);
+            const result = await admin.messaging().sendEach(batch);
+            if (result.failureCount > 0) {
+              result.responses.forEach((resp, idx) => {
+                if (!resp.success) {
+                  // 만료된 토큰 처리
+                  const errorCode = resp.error && resp.error.code;
+                  const invalidCodes = [
+                    "messaging/registration-token-not-registered",
+                    "messaging/invalid-registration-token",
+                    "messaging/invalid-argument",
+                  ];
+                  const isInvalidToken = errorCode &&
+                    invalidCodes.includes(errorCode);
+                  if (isInvalidToken) {
+                    failedTokens.push(batch[idx].token);
+                  }
+                }
+              });
+
+              // 만료된 토큰 삭제
+              if (failedTokens.length > 0) {
+                try {
+                  const usersSnapshot = await admin
+                      .database()
+                      .ref("users")
+                      .once("value");
+                  const users = usersSnapshot.val();
+
+                  if (users) {
+                    for (const [userId, user] of Object.entries(users)) {
+                      if (user.fcmToken &&
+                          failedTokens.includes(user.fcmToken)) {
+                        await admin
+                            .database()
+                            .ref(`users/${userId}/fcmToken`)
+                            .remove();
+                      }
+                    }
+                  }
+                } catch (deleteError) {
+                  // 토큰 삭제 오류 무시
+                }
+              }
+            }
+          }
+        }
+
+        return null;
+      } catch (error) {
+        return null;
+      }
+    },
+);
+
+/**
  * 일정 추가 시 알림 전송
  */
 exports.onEventCreated = onValueCreated(
