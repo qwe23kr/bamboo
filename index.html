@@ -1776,10 +1776,11 @@
                     eventsDiv.appendChild(event);
                 }
                 
-                // 날짜 클릭 이벤트 추가
+                // 날짜 클릭 이벤트 추가 (클로저로 해당 셀 날짜 복사본 전달 - 클릭한 날짜가 정확히 모달에 전달되도록)
                 if (isCurrentMonth) {
                     dayDiv.style.cursor = 'pointer';
-                    dayDiv.onclick = () => openEventModal(currentDate);
+                    const dateCopy = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+                    dayDiv.onclick = () => openEventModal(dateCopy);
                 }
                 
                 dayDiv.appendChild(eventsDiv);
@@ -1846,10 +1847,13 @@
             const titleInput = document.getElementById('eventTitle');
             const descInput = document.getElementById('eventDescription');
             
-            // 로컬 날짜를 YYYY-MM-DD 형식으로 변환
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
+            // 로컬 날짜만 사용 (시간/UTC 무관). YYYY-MM-DD 형식으로 저장·표시 통일
+            const y = date.getFullYear();
+            const m = date.getMonth();
+            const d = date.getDate();
+            const year = y;
+            const month = String(m + 1).padStart(2, '0');
+            const day = String(d).padStart(2, '0');
             dateInput.value = `${year}-${month}-${day}`;
             
             titleInput.value = '';
@@ -1881,7 +1885,7 @@
         document.getElementById('eventForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const date = document.getElementById('eventDate').value;
+            const dateStr = document.getElementById('eventDate').value;
             const title = document.getElementById('eventTitle').value.trim();
             const description = document.getElementById('eventDescription').value.trim();
             
@@ -1896,7 +1900,7 @@
                 const newEventRef = push(eventsRef);
                 
                 await set(newEventRef, {
-                    date: date,
+                    date: dateStr,
                     title: title,
                     description: description || '',
                     author: userName,
@@ -2058,20 +2062,19 @@
             `;
             
             // DOM에 추가한 후 댓글 로드
-            // setTimeout을 사용하여 DOM이 완전히 렌더링된 후 댓글 로드
             setTimeout(() => {
                 loadComments(postId, tabName);
                 
-                // 슬라이드 초기화 (여러 이미지가 있는 경우)
+                // 슬라이드 초기화: 모바일에서 레이아웃 완료 후 실행 (픽셀 기반으로 동작 보장)
                 if (sliderId && post.media && post.media.length > 1) {
-                    initMediaSlider(sliderId, post.media.length);
+                    setTimeout(() => initMediaSlider(sliderId, post.media.length), 150);
                 }
             }, 0);
             
             return postDiv;
         }
         
-        // 미디어 슬라이드 초기화
+        // 미디어 슬라이드 초기화 (픽셀 기반 - 모바일에서 % 해석 오류 방지)
         function initMediaSlider(sliderId, totalItems) {
             const slider = document.getElementById(sliderId);
             if (!slider) return;
@@ -2083,38 +2086,50 @@
             const prevBtn = slider.querySelector('.post-media-slider-nav.prev');
             const nextBtn = slider.querySelector('.post-media-slider-nav.next');
             
-            // 모바일 포함 모든 환경에서 슬라이드가 가로 한 줄로 보이도록 너비 명시
-            const itemPercent = 100 / totalItems;
-            container.style.width = (totalItems * 100) + '%';
-            items.forEach(function(item) {
-                item.style.flex = '0 0 ' + itemPercent + '%';
-                item.style.width = itemPercent + '%';
-            });
+            var slideWidthPx = slider.offsetWidth || 0;
+            if (slideWidthPx <= 0) {
+                requestAnimationFrame(function() {
+                    requestAnimationFrame(function() {
+                        slideWidthPx = slider.offsetWidth || 320;
+                        applySliderSizes();
+                    });
+                });
+            } else {
+                applySliderSizes();
+            }
+            
+            function applySliderSizes() {
+                var w = slider.offsetWidth || 320;
+                slideWidthPx = w;
+                container.style.width = (totalItems * w) + 'px';
+                for (var i = 0; i < items.length; i++) {
+                    items[i].style.width = w + 'px';
+                    items[i].style.minWidth = w + 'px';
+                    items[i].style.flex = '0 0 ' + w + 'px';
+                }
+                goToSlide(currentIndex);
+            }
             
             let currentIndex = 0;
             let startX = 0;
             let currentX = 0;
             let isDragging = false;
             
-            // 슬라이드 이동 함수 (컨테이너 너비가 N*100%이므로 한 칸 = 100/totalItems %)
-            const slidePercent = 100 / totalItems;
             function goToSlide(index) {
                 if (index < 0 || index >= totalItems) return;
                 
                 currentIndex = index;
-                container.style.transform = `translateX(-${currentIndex * slidePercent}%)`;
+                var w = slider.offsetWidth || slideWidthPx || 320;
+                container.style.transform = 'translateX(-' + (currentIndex * w) + 'px)';
                 
-                // 인디케이터 업데이트
-                indicators.forEach((indicator, i) => {
+                indicators.forEach(function(indicator, i) {
                     indicator.classList.toggle('active', i === currentIndex);
                 });
                 
-                // 카운터 업데이트
                 if (counter) {
-                    counter.textContent = `${currentIndex + 1} / ${totalItems}`;
+                    counter.textContent = (currentIndex + 1) + ' / ' + totalItems;
                 }
                 
-                // 버튼 상태 업데이트
                 if (prevBtn) prevBtn.disabled = currentIndex === 0;
                 if (nextBtn) nextBtn.disabled = currentIndex === totalItems - 1;
             }
@@ -2172,10 +2187,9 @@
                 
                 if (isHorizontalSwipe) {
                     e.stopPropagation();
-                    // 실시간으로 슬라이드 이동 (한 슬라이드 = slider 너비 기준)
-                    const sliderWidth = slider.offsetWidth || 1;
-                    const offsetPercent = -currentIndex * slidePercent + (diffX / sliderWidth) * slidePercent;
-                    container.style.transform = `translateX(${offsetPercent}%)`;
+                    var w = slider.offsetWidth || slideWidthPx || 1;
+                    var offsetPx = -currentIndex * w + diffX;
+                    container.style.transform = 'translateX(' + offsetPx + 'px)';
                 }
             }, { passive: false });
             
@@ -2188,8 +2202,9 @@
                 
                 touchEndX = e.changedTouches[0].clientX;
                 const diff = touchStartX - touchEndX;
-                const threshold = 50; // 최소 스와이프 거리
-                const swipeRatio = Math.abs(diff) / (slider.offsetWidth || 1);
+                const threshold = 50;
+                var w = slider.offsetWidth || slideWidthPx || 1;
+                const swipeRatio = Math.abs(diff) / w;
                 
                 if (Math.abs(diff) > threshold || swipeRatio > 0.2) {
                     if (diff > 0 && currentIndex < totalItems - 1) {
@@ -2247,7 +2262,7 @@
             goToSlide(0);
         }
         
-        // 슬라이드 이동 함수 (버튼용)
+        // 슬라이드 이동 함수 (버튼용) - 픽셀 기반
         window.slideMedia = function(sliderId, direction) {
             const slider = document.getElementById(sliderId);
             if (!slider) return;
@@ -2256,7 +2271,7 @@
             const indicators = slider.querySelectorAll('.post-media-slider-indicator');
             const counter = slider.querySelector('.post-media-slider-counter');
             const totalItems = indicators.length;
-            const slidePercent = 100 / totalItems;
+            const w = slider.offsetWidth || 320;
             
             let currentIndex = 0;
             indicators.forEach((indicator, index) => {
@@ -2268,14 +2283,14 @@
             const newIndex = currentIndex + direction;
             if (newIndex < 0 || newIndex >= totalItems) return;
             
-            container.style.transform = `translateX(-${newIndex * slidePercent}%)`;
+            container.style.transform = 'translateX(-' + (newIndex * w) + 'px)';
             
             indicators.forEach((indicator, index) => {
                 indicator.classList.toggle('active', index === newIndex);
             });
             
             if (counter) {
-                counter.textContent = `${newIndex + 1} / ${totalItems}`;
+                counter.textContent = (newIndex + 1) + ' / ' + totalItems;
             }
             
             const prevBtn = slider.querySelector('.post-media-slider-nav.prev');
