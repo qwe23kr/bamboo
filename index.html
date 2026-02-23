@@ -311,30 +311,47 @@
             border-radius: 10px;
         }
         
-        /* 이미지 슬라이드 스타일 */
+        /* 이미지 슬라이드 스타일 - 모바일 터치 슬라이드 확실히 동작 */
         .post-media-slider {
             position: relative;
             margin: 15px 0;
             border-radius: 10px;
             overflow: hidden;
-            touch-action: pan-y;
+            touch-action: none;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
         }
         
         .post-media-slider-container {
             display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
             transition: transform 0.3s ease;
             will-change: transform;
             cursor: grab;
+            overflow: visible;
         }
         
         .post-media-slider-container:active {
             cursor: grabbing;
         }
         
+        @media (max-width: 768px) {
+            .post-media-slider-container {
+                cursor: default;
+            }
+        }
+        
         .post-media-slider-item {
-            min-width: 100%;
             flex-shrink: 0;
+            flex-grow: 0;
             position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            box-sizing: border-box;
         }
         
         .post-media-slider-item img,
@@ -343,6 +360,8 @@
             max-height: 500px;
             object-fit: contain;
             display: block;
+            pointer-events: none;
+            -webkit-user-drag: none;
         }
         
         .post-media-slider-indicators {
@@ -1597,6 +1616,14 @@
         let currentCalendarDate = new Date(2026, 1, 7); // 2026년 2월 7일 (D+1 기준일)
         const dDayBase = new Date(2026, 1, 7); // 2026년 2월 7일
         
+        // YYYY-MM-DD 문자열을 로컬 날짜로 파싱 (UTC 파싱 시 타임존 때문에 하루 밀리는 문제 방지)
+        function parseLocalDate(dateStr) {
+            if (!dateStr) return new Date(NaN);
+            const parts = String(dateStr).split('-').map(Number);
+            if (parts.length !== 3) return new Date(dateStr);
+            return new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+        
         // 달력 렌더링
         async function renderCalendar() {
             const calendarGrid = document.getElementById('calendarGrid');
@@ -1637,7 +1664,7 @@
             if (eventsSnapshot.exists()) {
                 const eventsData = eventsSnapshot.val();
                 Object.entries(eventsData).forEach(([eventId, event]) => {
-                    const eventDate = new Date(event.date);
+                    const eventDate = parseLocalDate(event.date);
                     const dateKey = `${eventDate.getFullYear()}-${eventDate.getMonth()}-${eventDate.getDate()}`;
                     if (!events[dateKey]) {
                         events[dateKey] = [];
@@ -1781,7 +1808,7 @@
                 .map(([id, event]) => ({
                     id,
                     ...event,
-                    date: new Date(event.date)
+                    date: parseLocalDate(event.date)
                 }))
                 .sort((a, b) => a.date - b.date);
             
@@ -2050,22 +2077,32 @@
             if (!slider) return;
             
             const container = slider.querySelector('.post-media-slider-container');
+            const items = container.querySelectorAll('.post-media-slider-item');
             const indicators = slider.querySelectorAll('.post-media-slider-indicator');
             const counter = slider.querySelector('.post-media-slider-counter');
             const prevBtn = slider.querySelector('.post-media-slider-nav.prev');
             const nextBtn = slider.querySelector('.post-media-slider-nav.next');
+            
+            // 모바일 포함 모든 환경에서 슬라이드가 가로 한 줄로 보이도록 너비 명시
+            const itemPercent = 100 / totalItems;
+            container.style.width = (totalItems * 100) + '%';
+            items.forEach(function(item) {
+                item.style.flex = '0 0 ' + itemPercent + '%';
+                item.style.width = itemPercent + '%';
+            });
             
             let currentIndex = 0;
             let startX = 0;
             let currentX = 0;
             let isDragging = false;
             
-            // 슬라이드 이동 함수
+            // 슬라이드 이동 함수 (컨테이너 너비가 N*100%이므로 한 칸 = 100/totalItems %)
+            const slidePercent = 100 / totalItems;
             function goToSlide(index) {
                 if (index < 0 || index >= totalItems) return;
                 
                 currentIndex = index;
-                container.style.transform = `translateX(-${currentIndex * 100}%)`;
+                container.style.transform = `translateX(-${currentIndex * slidePercent}%)`;
                 
                 // 인디케이터 업데이트
                 indicators.forEach((indicator, i) => {
@@ -2105,35 +2142,69 @@
                 });
             });
             
-            // 터치 이벤트 (모바일)
+            // 터치 이벤트 (모바일) - 개선된 버전
             let touchStartX = 0;
             let touchEndX = 0;
+            let touchStartY = 0;
+            let isHorizontalSwipe = false;
             
             container.addEventListener('touchstart', (e) => {
                 touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
                 isDragging = true;
+                isHorizontalSwipe = false;
+                container.style.transition = 'none'; // 실시간 이동을 위해 transition 제거
             }, { passive: true });
             
             container.addEventListener('touchmove', (e) => {
                 if (!isDragging) return;
-                touchEndX = e.touches[0].clientX;
-            }, { passive: true });
+                
+                const touchCurrentX = e.touches[0].clientX;
+                const touchCurrentY = e.touches[0].clientY;
+                const diffX = touchStartX - touchCurrentX;
+                const diffY = touchStartY - touchCurrentY;
+                
+                // 수평 스와이프인지 확인 (수평이 수직보다 크면)
+                if (!isHorizontalSwipe && Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
+                    isHorizontalSwipe = true;
+                    e.preventDefault(); // 수직 스크롤 방지
+                }
+                
+                if (isHorizontalSwipe) {
+                    e.stopPropagation();
+                    // 실시간으로 슬라이드 이동 (한 슬라이드 = slider 너비 기준)
+                    const sliderWidth = slider.offsetWidth || 1;
+                    const offsetPercent = -currentIndex * slidePercent + (diffX / sliderWidth) * slidePercent;
+                    container.style.transform = `translateX(${offsetPercent}%)`;
+                }
+            }, { passive: false });
             
             container.addEventListener('touchend', (e) => {
                 if (!isDragging) return;
                 isDragging = false;
+                container.style.transition = 'transform 0.3s ease'; // transition 복원
                 
+                if (!isHorizontalSwipe) return;
+                
+                touchEndX = e.changedTouches[0].clientX;
                 const diff = touchStartX - touchEndX;
                 const threshold = 50; // 최소 스와이프 거리
+                const swipeRatio = Math.abs(diff) / (slider.offsetWidth || 1);
                 
-                if (Math.abs(diff) > threshold) {
+                if (Math.abs(diff) > threshold || swipeRatio > 0.2) {
                     if (diff > 0 && currentIndex < totalItems - 1) {
                         // 왼쪽으로 스와이프 (다음)
                         goToSlide(currentIndex + 1);
                     } else if (diff < 0 && currentIndex > 0) {
                         // 오른쪽으로 스와이프 (이전)
                         goToSlide(currentIndex - 1);
+                    } else {
+                        // 원래 위치로 복귀
+                        goToSlide(currentIndex);
                     }
+                } else {
+                    // 원래 위치로 복귀
+                    goToSlide(currentIndex);
                 }
             }, { passive: true });
             
@@ -2185,6 +2256,7 @@
             const indicators = slider.querySelectorAll('.post-media-slider-indicator');
             const counter = slider.querySelector('.post-media-slider-counter');
             const totalItems = indicators.length;
+            const slidePercent = 100 / totalItems;
             
             let currentIndex = 0;
             indicators.forEach((indicator, index) => {
@@ -2196,7 +2268,7 @@
             const newIndex = currentIndex + direction;
             if (newIndex < 0 || newIndex >= totalItems) return;
             
-            container.style.transform = `translateX(-${newIndex * 100}%)`;
+            container.style.transform = `translateX(-${newIndex * slidePercent}%)`;
             
             indicators.forEach((indicator, index) => {
                 indicator.classList.toggle('active', index === newIndex);
