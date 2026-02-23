@@ -1,5 +1,5 @@
-// Service Worker for PWA
-const CACHE_NAME = 'bamboo-v1';
+// Service Worker for PWA (버전 올리면 캐시 갱신 → 새 코드 적용)
+const CACHE_NAME = 'bamboo-v2';
 // GitHub Pages 경로에 맞게 동적으로 설정
 const basePath = self.location.pathname.split('/sw.js')[0] || '/bamboo';
 const urlsToCache = [
@@ -35,12 +35,24 @@ self.addEventListener('activate', (event) => {
 
 // fetch 이벤트 (오프라인 지원)
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  const isIndex = url.pathname.endsWith('/') || url.pathname.endsWith('/index.html');
+  // index.html은 먼저 네트워크 요청 → 실패 시 캐시 (배포 후 바로 새 코드 적용)
+  if (isIndex) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
   event.respondWith(
     caches.match(event.request)
-      .then((response) => {
-        // 캐시에 있으면 캐시 반환, 없으면 네트워크 요청
-        return response || fetch(event.request);
-      })
+      .then((response) => response || fetch(event.request))
   );
 });
 

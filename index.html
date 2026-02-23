@@ -1619,8 +1619,10 @@
         // YYYY-MM-DD 문자열을 로컬 날짜로 파싱 (UTC 파싱 시 타임존 때문에 하루 밀리는 문제 방지)
         function parseLocalDate(dateStr) {
             if (!dateStr) return new Date(NaN);
-            const parts = String(dateStr).split('-').map(Number);
-            if (parts.length !== 3) return new Date(dateStr);
+            var s = String(dateStr).trim();
+            if (s.indexOf('T') !== -1) s = s.substring(0, s.indexOf('T'));
+            var parts = s.split('-').map(function(x) { return parseInt(x, 10); });
+            if (parts.length < 3 || isNaN(parts[0]) || isNaN(parts[1]) || isNaN(parts[2])) return new Date(NaN);
             return new Date(parts[0], parts[1] - 1, parts[2]);
         }
         
@@ -1885,7 +1887,8 @@
         document.getElementById('eventForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const dateStr = document.getElementById('eventDate').value;
+            var rawDate = document.getElementById('eventDate').value;
+            var dateStr = (rawDate && String(rawDate).indexOf('T') !== -1) ? rawDate.substring(0, 10) : (rawDate || '');
             const title = document.getElementById('eventTitle').value.trim();
             const description = document.getElementById('eventDescription').value.trim();
             
@@ -2012,15 +2015,19 @@
                         mediaHTML = `<div class="post-media"><img src="${post.media[0].url}" alt="이미지"></div>`;
                     }
                 } else {
-                    // 여러 이미지일 때 슬라이드로 표시
+                    // 여러 이미지일 때 슬라이드로 표시 (HTML에 인라인 레이아웃 적용 → JS 없이도 모바일에서 가로 한 줄 표시)
+                    var n = post.media.length;
+                    var itemPct = (100 / n).toFixed(2);
+                    var containerWidthPct = (n * 100);
                     sliderId = `slider-${tabName}-${postId}`;
                     mediaHTML = `<div class="post-media-slider" id="${sliderId}">`;
-                    mediaHTML += '<div class="post-media-slider-container">';
+                    mediaHTML += '<div class="post-media-slider-container" style="width:' + containerWidthPct + '%">';
                     post.media.forEach((media, index) => {
+                        var itemStyle = 'flex:0 0 ' + itemPct + '%;width:' + itemPct + '%;min-width:' + itemPct + '%;';
                         if (media.type === 'video') {
-                            mediaHTML += `<div class="post-media-slider-item"><video controls><source src="${media.url}" type="video/mp4"></video></div>`;
+                            mediaHTML += '<div class="post-media-slider-item" style="' + itemStyle + '"><video controls><source src="' + media.url + '" type="video/mp4"></video></div>';
                         } else {
-                            mediaHTML += `<div class="post-media-slider-item"><img src="${media.url}" alt="이미지 ${index + 1}"></div>`;
+                            mediaHTML += '<div class="post-media-slider-item" style="' + itemStyle + '"><img src="' + media.url + '" alt="이미지 ' + (index + 1) + '"></div>';
                         }
                     });
                     mediaHTML += '</div>';
@@ -2086,18 +2093,6 @@
             const prevBtn = slider.querySelector('.post-media-slider-nav.prev');
             const nextBtn = slider.querySelector('.post-media-slider-nav.next');
             
-            var slideWidthPx = slider.offsetWidth || 0;
-            if (slideWidthPx <= 0) {
-                requestAnimationFrame(function() {
-                    requestAnimationFrame(function() {
-                        slideWidthPx = slider.offsetWidth || 320;
-                        applySliderSizes();
-                    });
-                });
-            } else {
-                applySliderSizes();
-            }
-            
             function applySliderSizes() {
                 var w = slider.offsetWidth || 320;
                 slideWidthPx = w;
@@ -2108,6 +2103,25 @@
                     items[i].style.flex = '0 0 ' + w + 'px';
                 }
                 goToSlide(currentIndex);
+            }
+            
+            if (slider.offsetWidth > 0) {
+                applySliderSizes();
+            } else {
+                requestAnimationFrame(function() {
+                    requestAnimationFrame(function() {
+                        if (slider.offsetWidth > 0) applySliderSizes();
+                    });
+                });
+                var io = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting && slider.offsetWidth > 0) {
+                            applySliderSizes();
+                            io.disconnect();
+                        }
+                    });
+                }, { rootMargin: '50px', threshold: 0 });
+                io.observe(slider);
             }
             
             let currentIndex = 0;
