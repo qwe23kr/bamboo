@@ -317,13 +317,13 @@
             border-radius: 10px;
         }
         
-        /* 이미지 슬라이드 - 세로 스크롤 허용(pan-y), 가로는 스와이프로 슬라이드 */
+        /* 이미지 슬라이드 - 터치로 옆으로 스와이프 (슬라이더 영역만 터치 캡처) */
         .post-media-slider {
             position: relative;
             margin: 15px 0;
             border-radius: 10px;
             overflow: hidden;
-            touch-action: pan-y;
+            touch-action: none;
             -webkit-overflow-scrolling: touch;
             width: 100%;
             min-width: 0;
@@ -338,6 +338,7 @@
             will-change: transform;
             cursor: grab;
             overflow: visible;
+            touch-action: none;
         }
         
         .post-media-slider-container:active {
@@ -2115,6 +2116,10 @@
             const prevBtn = slider.querySelector('.post-media-slider-nav.prev');
             const nextBtn = slider.querySelector('.post-media-slider-nav.next');
             
+            var slideWidthPx = 0;
+            var currentIndex = 0;
+            var startX = 0, currentX = 0, isDragging = false;
+            
             function applySliderSizes() {
                 var w = slider.offsetWidth || 320;
                 slideWidthPx = w;
@@ -2145,11 +2150,6 @@
                 }, { rootMargin: '50px', threshold: 0 });
                 io.observe(slider);
             }
-            
-            let currentIndex = 0;
-            let startX = 0;
-            let currentX = 0;
-            let isDragging = false;
             
             function goToSlide(index) {
                 if (index < 0 || index >= totalItems) return;
@@ -2193,39 +2193,41 @@
                 });
             });
             
-            // 터치 이벤트 (모바일) - 개선된 버전
+            // 터치 이벤트 (모바일) - 옆으로 스와이프 시 슬라이드
             let touchStartX = 0;
             let touchEndX = 0;
             let touchStartY = 0;
             let isHorizontalSwipe = false;
+            let directionLocked = false;
             
             container.addEventListener('touchstart', (e) => {
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
                 isDragging = true;
                 isHorizontalSwipe = false;
-                container.style.transition = 'none'; // 실시간 이동을 위해 transition 제거
+                directionLocked = false;
+                container.style.transition = 'none';
             }, { passive: true });
             
             container.addEventListener('touchmove', (e) => {
-                if (!isDragging) return;
-                
-                const touchCurrentX = e.touches[0].clientX;
-                const touchCurrentY = e.touches[0].clientY;
-                const diffX = touchStartX - touchCurrentX;
-                const diffY = touchStartY - touchCurrentY;
-                
-                if (!isHorizontalSwipe && (Math.abs(diffX) > 10 || Math.abs(diffY) > 10)) {
-                    isHorizontalSwipe = Math.abs(diffX) > Math.abs(diffY);
+                if (!isDragging || !e.touches.length) return;
+                var curX = e.touches[0].clientX;
+                var curY = e.touches[0].clientY;
+                var diffX = touchStartX - curX;
+                var diffY = touchStartY - curY;
+                if (!directionLocked) {
+                    var ax = Math.abs(diffX), ay = Math.abs(diffY);
+                    if (ax > 6 || ay > 6) {
+                        directionLocked = true;
+                        isHorizontalSwipe = ax >= ay;
+                    }
                 }
                 if (isHorizontalSwipe) {
                     e.preventDefault();
-                    e.stopPropagation();
                     var w = slider.offsetWidth || slideWidthPx || 1;
-                    var offsetPx = -currentIndex * w + diffX;
-                    container.style.transform = 'translateX(' + offsetPx + 'px)';
+                    container.style.transform = 'translateX(' + (-currentIndex * w + diffX) + 'px)';
                 }
-            }, { passive: false });
+            }, { passive: false, capture: true });
             
             container.addEventListener('touchend', (e) => {
                 if (!isDragging) return;
