@@ -286,13 +286,19 @@
             margin: 15px 0;
             border-radius: 10px;
             overflow: hidden;
+            width: 100%;
+            height: 380px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .post-media img,
         .post-media video {
             width: 100%;
-            max-height: 500px;
-            object-fit: contain;
+            height: 100%;
+            object-fit: cover;
             border-radius: 10px;
         }
         
@@ -311,13 +317,13 @@
             border-radius: 10px;
         }
         
-        /* 이미지 슬라이드 스타일 - 모바일 터치 슬라이드 확실히 동작 */
+        /* 이미지 슬라이드 - 세로 스크롤 허용(pan-y), 가로는 스와이프로 슬라이드 */
         .post-media-slider {
             position: relative;
             margin: 15px 0;
             border-radius: 10px;
             overflow: hidden;
-            touch-action: none;
+            touch-action: pan-y;
             -webkit-overflow-scrolling: touch;
             width: 100%;
             min-width: 0;
@@ -352,13 +358,18 @@
             -webkit-user-select: none;
             -webkit-touch-callout: none;
             box-sizing: border-box;
+            height: 380px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .post-media-slider-item img,
         .post-media-slider-item video {
             width: 100%;
-            max-height: 500px;
-            object-fit: contain;
+            height: 100%;
+            object-fit: cover;
             display: block;
             pointer-events: none;
             -webkit-user-drag: none;
@@ -423,6 +434,17 @@
         .post-media-slider-nav:disabled {
             opacity: 0.3;
             cursor: not-allowed;
+        }
+        
+        @media (max-width: 768px) {
+            .post-media-slider-nav.prev,
+            .post-media-slider-nav.next {
+                display: none;
+            }
+            .post-media,
+            .post-media-slider-item {
+                height: 320px;
+            }
         }
         
         .post-media-slider-counter {
@@ -2193,13 +2215,11 @@
                 const diffX = touchStartX - touchCurrentX;
                 const diffY = touchStartY - touchCurrentY;
                 
-                // 수평 스와이프인지 확인 (수평이 수직보다 크면)
-                if (!isHorizontalSwipe && Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
-                    isHorizontalSwipe = true;
-                    e.preventDefault(); // 수직 스크롤 방지
+                if (!isHorizontalSwipe && (Math.abs(diffX) > 10 || Math.abs(diffY) > 10)) {
+                    isHorizontalSwipe = Math.abs(diffX) > Math.abs(diffY);
                 }
-                
                 if (isHorizontalSwipe) {
+                    e.preventDefault();
                     e.stopPropagation();
                     var w = slider.offsetWidth || slideWidthPx || 1;
                     var offsetPx = -currentIndex * w + diffX;
@@ -3499,19 +3519,22 @@ const img = new Image();
         // 페이지 로드 시 사용자 정보 가져오기
         loadUserInfo();
         
-        // PWA Service Worker 등록
+        // PWA Service Worker 등록 (모바일 설치 앱도 배포 후 새 코드 적용되도록)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                // GitHub Pages 경로에 맞게 수정
                 const swPath = window.location.pathname.includes('/bamboo/') 
                     ? '/bamboo/sw.js' 
                     : '/sw.js';
                 
                 navigator.serviceWorker.register(swPath)
                     .then((registration) => {
+                        registration.update();
+                        navigator.serviceWorker.addEventListener('controllerchange', function onControllerChange() {
+                            navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
+                            window.location.reload();
+                        });
                     })
-                    .catch((error) => {
-                    });
+                    .catch(function() {});
             });
         }
         

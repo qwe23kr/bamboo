@@ -8,28 +8,28 @@ const urlsToCache = [
   basePath + '/login.html'
 ];
 
-// 설치 이벤트
+// 설치 이벤트 (모바일 PWA: 새 버전이 있으면 바로 활성화되도록 skipWaiting)
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        return cache.addAll(urlsToCache);
-      })
+      .then((cache) => cache.addAll(urlsToCache))
   );
 });
 
-// 활성화 이벤트
+// 활성화 이벤트 (열려 있는 PWA 창도 즉시 새 SW가 제어하도록 claim)
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    Promise.all([
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) return caches.delete(cacheName);
+          })
+        );
+      }),
+      self.clients.claim()
+    ])
   );
 });
 
