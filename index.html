@@ -599,6 +599,8 @@
             margin-bottom: 20px;
             font-size: 1.05em;
             font-weight: 400;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
         
         .comments-section {
@@ -735,6 +737,8 @@
             font-size: 0.95em;
             font-weight: 400;
             display: inline;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
         
         .comment-text {
@@ -990,6 +994,8 @@
         .event-description {
             color: #666;
             font-size: 0.9em;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
         
         .calendar-event.schedule {
@@ -1866,7 +1872,7 @@
                         ${deleteBtn}
                     </div>
                     <div class="event-title">${event.title}</div>
-                    ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
+                    ${event.description ? `<div class="event-description">${formatContentForDisplay(event.description)}</div>` : ''}
                 `;
                 
                 container.appendChild(eventDiv);
@@ -2004,6 +2010,19 @@
             });
         }
         
+        // 줄바꿈·띄어쓰기 보존 (모바일 포함) — HTML 이스케이프 후 \n을 <br>로
+        function formatContentForDisplay(text) {
+            if (text == null || text === '') return '';
+            var s = String(text);
+            return s
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\r\n/g, '<br>')
+                .replace(/\n/g, '<br>')
+                .replace(/\r/g, '<br>');
+        }
+        
         // 글 요소 생성
         function createPostElement(postId, post, tabName) {
             const postDiv = document.createElement('div');
@@ -2076,7 +2095,7 @@
                 }
             }
             
-            const contentHTML = post.content ? `<div class="post-content">${post.content}</div>` : '';
+            const contentHTML = post.content ? `<div class="post-content">${formatContentForDisplay(post.content)}</div>` : '';
             
             postDiv.innerHTML = `
                 <div class="post-header">
@@ -2426,7 +2445,7 @@
                     <div class="comment-text-left">
                         <span class="comment-author">${comment.author}</span>
                         <span style="color: #999;">:</span>
-                        <span class="comment-content">${comment.content}</span>
+                        <span class="comment-content">${formatContentForDisplay(comment.content)}</span>
                         ${deleteBtnHTML}
                     </div>
                     <div class="comment-date">${dateStr}</div>
