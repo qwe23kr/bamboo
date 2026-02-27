@@ -130,6 +130,13 @@
             font-size: 0.95em;
         }
         
+        .dday-header {
+            color: #ff1493;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-right: 8px;
+        }
+        
         .btn {
             padding: 10px 18px;
             border: none;
@@ -152,6 +159,29 @@
         .btn-pink:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
+        }
+        
+        .event-form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+        .event-form-actions .btn {
+            padding: 14px 28px;
+            min-height: 48px;
+            font-size: 1.05em;
+        }
+        .event-form-actions .btn-pink {
+            margin-left: auto;
+        }
+        .btn-outline {
+            background: transparent;
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+        }
+        .btn-outline:hover {
+            background: rgba(231, 76, 60, 0.1);
         }
         
         .btn-logout {
@@ -502,6 +532,15 @@
             box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
         }
         
+        #eventTitle {
+            min-height: 44px;
+            height: 44px;
+            resize: none;
+            overflow: hidden;
+            padding: 12px 15px;
+            box-sizing: border-box;
+        }
+        
         .posts-container {
             display: flex;
             flex-direction: column;
@@ -788,6 +827,9 @@
             border-radius: 20px;
             padding: 15px;
             box-shadow: 0 2px 10px rgba(255, 182, 193, 0.3);
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
         }
         
         .calendar-header {
@@ -829,6 +871,9 @@
             grid-template-columns: repeat(7, 1fr);
             gap: 5px;
             margin-bottom: 15px;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
         }
         
         .calendar-day-header {
@@ -842,12 +887,13 @@
         
         .calendar-day {
             aspect-ratio: 1;
+            min-width: 0;
             background: #fff5f5;
             border: 1.5px solid #ffc0cb;
             border-radius: 8px;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: stretch;
             justify-content: flex-start;
             padding: 4px;
             cursor: pointer;
@@ -855,6 +901,30 @@
             font-family: 'Yanolja', sans-serif;
             position: relative;
             min-height: 0;
+        }
+        
+        .calendar-day-top {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 4px;
+            width: 100%;
+            margin-bottom: 2px;
+        }
+        
+        .calendar-day-number {
+            position: relative;
+            z-index: 2;
+            font-size: 0.85em;
+            color: #333;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        
+        .calendar-day-top .calendar-event.dday {
+            font-size: 0.55em;
+            padding: 1px 3px;
+            line-height: 1.2;
         }
         
         .calendar-day:hover {
@@ -871,13 +941,6 @@
             background: linear-gradient(135deg, #ffc0cb 0%, #ffb6c1 100%);
             border-color: #ff69b4;
             font-weight: 600;
-        }
-        
-        .calendar-day-number {
-            font-size: 0.85em;
-            color: #333;
-            margin-bottom: 2px;
-            font-weight: 500;
         }
         
         .calendar-day-events {
@@ -1009,6 +1072,21 @@
             overflow: hidden;
         }
         
+        .calendar-event-bar {
+            padding: 1px 6px;
+            margin: 2px 4px 8px 4px;
+            border-radius: 4px;
+            font-size: 0.65em;
+            line-height: 1.3;
+            color: #333;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 1;
+            align-self: end;
+        }
+        
         /* 관리자 승인 모달 */
         .modal {
             display: none;
@@ -1128,6 +1206,34 @@
             margin-bottom: 15px;
         }
         
+        .event-dates-group .form-group {
+            margin-bottom: 0;
+        }
+        .event-dates-group .form-group + .form-group {
+            margin-top: 6px;
+        }
+        
+        .event-end-quick-btns {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .event-d-btn {
+            padding: 6px 12px;
+            border: 2px solid #ffc0cb;
+            border-radius: 10px;
+            background: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: 'Yanolja', sans-serif;
+            transition: all 0.2s;
+        }
+        .event-d-btn:hover {
+            border-color: #ff69b4;
+            background: #fff5f8;
+        }
+
         .form-group label {
             display: block;
             margin-bottom: 5px;
@@ -1147,6 +1253,29 @@
         .form-group input:focus {
             outline: none;
             border-color: #ff69b4;
+        }
+        
+        
+        .event-color-circles {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .event-color-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            padding: 0;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .event-color-circle:hover {
+            transform: scale(1.1);
+        }
+        .event-color-circle.selected {
+            border-color: #333;
+            box-shadow: 0 0 0 1px #fff;
         }
         
         .user-details strong {
@@ -1367,6 +1496,7 @@
     <div class="header">
         <div class="logo">✨ 밤부 ✨ - 대나무숲</div>
         <div class="user-info">
+            <span class="dday-header" id="dDayHeader"></span>
             <span class="user-name" id="userName">로딩 중...</span>
             <button id="approveBtn" class="btn btn-pink" onclick="openUserManagementModal()" style="display: none;">사용자 관리</button>
             <button class="btn-logout" id="logoutBtn">로그아웃</button>
@@ -1408,20 +1538,7 @@
                 <button class="calendar-nav-btn" onclick="changeMonth(1)">▶</button>
             </div>
             <div class="calendar-grid" id="calendarGrid"></div>
-            <div class="calendar-legend">
-                <div class="legend-item">
-                    <span class="legend-color" style="background: #ff69b4;"></span>
-                    <span>생일</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-color" style="background: #ffc0cb;"></span>
-                    <span>D+이벤트</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-color" style="background: #90EE90;"></span>
-                    <span>일정</span>
-                </div>
-            </div>
+            
             <div class="calendar-events-list" id="calendarEventsList">
                 <h3 class="events-list-title">📅 일정 목록</h3>
                 <div id="eventsListContainer"></div>
@@ -1443,9 +1560,40 @@
             </div>
             <form id="eventForm" class="write-form">
                 <input type="hidden" id="eventDate" value="">
-                <input type="text" id="eventTitle" placeholder="일정 제목을 입력하세요..." required>
+                <input type="hidden" id="eventId" value="">
+                <div class="event-dates-group">
+                    <div class="form-group">
+                        <label>시작일</label>
+                        <input type="date" id="eventStartDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>종료일</label>
+                        <input type="date" id="eventEndDate" required>
+                        <div class="event-end-quick-btns">
+                            <button type="button" class="event-d-btn" data-days="0">당일</button>
+                            <button type="button" class="event-d-btn" data-days="1">D+1</button>
+                            <button type="button" class="event-d-btn" data-days="3">D+3</button>
+                            <button type="button" class="event-d-btn" data-days="5">D+5</button>
+                            <button type="button" class="event-d-btn" data-days="7">D+7</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>막대 색상</label>
+                    <input type="hidden" id="eventColor" value="#90EE90">
+                    <div class="event-color-circles">
+                        <button type="button" class="event-color-circle" data-color="#e74c3c" title="붉은 계열" style="background:#e74c3c"></button>
+                        <button type="button" class="event-color-circle selected" data-color="#90EE90" title="초록 계열" style="background:#90EE90"></button>
+                        <button type="button" class="event-color-circle" data-color="#5dade2" title="파란 계열" style="background:#5dade2"></button>
+                        <button type="button" class="event-color-circle" data-color="#f8b4d9" title="핑크 계열" style="background:#f8b4d9"></button>
+                    </div>
+                </div>
+                <textarea id="eventTitle" placeholder="일정 제목을 입력하세요..." rows="1" required></textarea>
                 <textarea id="eventDescription" placeholder="일정 설명 (선택사항)" rows="3"></textarea>
-                <button type="submit" class="btn btn-pink">일정 추가</button>
+                <div class="event-form-actions">
+                    <button type="button" class="btn btn-outline" id="eventDeleteBtn" style="display: none;">삭제</button>
+                    <button type="submit" class="btn btn-pink" id="eventSubmitBtn">일정 추가</button>
+                </div>
             </form>
         </div>
     </div>
@@ -1603,6 +1751,17 @@
             
             document.getElementById('userName').textContent = userName + '님';
             
+            var dDayEl = document.getElementById('dDayHeader');
+            if (dDayEl) {
+                var dDayBase = new Date(2026, 1, 7); // 2026년 2월 7일 = D+1
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+                dDayBase.setHours(0, 0, 0, 0);
+                var daysDiff = Math.floor((today - dDayBase) / (24 * 60 * 60 * 1000));
+                var dPlus = daysDiff + 1; // 당일이 D+1
+                dDayEl.textContent = dPlus >= 1 ? 'D+' + dPlus + ' ' : 'D' + dPlus + ' ';
+            }
+            
             if (isAdmin) {
                 document.getElementById('approveBtn').style.display = 'block';
             }
@@ -1651,7 +1810,7 @@
         
         // 달력 관련 변수
         let currentCalendarDate = new Date(2026, 1, 7); // 2026년 2월 7일 (D+1 기준일)
-        const dDayBase = new Date(2026, 1, 7); // 2026년 2월 7일
+        const dDayBase = new Date(2026, 1, 7); // 2026년 2월 7일 = D+1
         
         // YYYY-MM-DD 문자열을 로컬 날짜로 파싱 (UTC 파싱 시 타임존 때문에 하루 밀리는 문제 방지)
         function parseLocalDate(dateStr) {
@@ -1695,24 +1854,40 @@
                 });
             }
             
-            // 일정 가져오기
+            // 일정 가져오기 (기간: startDate~endDate, 색상 eventColor)
             const eventsRef = ref(database, 'events');
             const eventsSnapshot = await get(eventsRef);
             const events = {};
+            const eventsListForBars = [];
             
             if (eventsSnapshot.exists()) {
                 const eventsData = eventsSnapshot.val();
                 Object.entries(eventsData).forEach(([eventId, event]) => {
-                    const eventDate = parseLocalDate(event.date);
-                    const dateKey = `${eventDate.getFullYear()}-${eventDate.getMonth()}-${eventDate.getDate()}`;
-                    if (!events[dateKey]) {
-                        events[dateKey] = [];
+                    const startDateStr = event.startDate || event.date;
+                    const endDateStr = event.endDate || event.date;
+                    const eventStart = parseLocalDate(startDateStr);
+                    const eventEnd = parseLocalDate(endDateStr);
+                    const color = event.eventColor || '#90EE90';
+                    for (var d = new Date(eventStart); d.getTime() <= eventEnd.getTime(); d.setDate(d.getDate() + 1)) {
+                        var dateKey = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+                        if (!events[dateKey]) events[dateKey] = [];
+                        events[dateKey].push({
+                            id: eventId,
+                            title: event.title,
+                            description: event.description || '',
+                            author: event.author,
+                            color: color,
+                            startDateStr: startDateStr,
+                            endDateStr: endDateStr,
+                            eventColor: color
+                        });
                     }
-                    events[dateKey].push({
+                    eventsListForBars.push({
                         id: eventId,
                         title: event.title,
-                        description: event.description,
-                        author: event.author
+                        startDate: eventStart,
+                        endDate: eventEnd,
+                        color: color
                     });
                 });
             }
@@ -1722,10 +1897,12 @@
             
             // 요일 헤더
             const dayHeaders = ['일', '월', '화', '수', '목', '금', '토'];
-            dayHeaders.forEach(day => {
+            dayHeaders.forEach((day, idx) => {
                 const header = document.createElement('div');
                 header.className = 'calendar-day-header';
                 header.textContent = day;
+                header.style.gridRow = '1';
+                header.style.gridColumn = String(idx + 1);
                 calendarGrid.appendChild(header);
             });
             
@@ -1745,6 +1922,8 @@
             
             // 필요한 날짜 수 계산
             const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            const gridStartTime = startDate.getTime();
+            const oneDay = 24 * 60 * 60 * 1000;
             
             for (let i = 0; i < totalDays; i++) {
                 const currentDate = new Date(startDate);
@@ -1752,6 +1931,8 @@
                 
                 const dayDiv = document.createElement('div');
                 dayDiv.className = 'calendar-day';
+                dayDiv.style.gridRow = String(2 + Math.floor(i / 7));
+                dayDiv.style.gridColumn = String((i % 7) + 1);
                 
                 const isCurrentMonth = currentDate.getMonth() === month;
                 const isToday = currentDate.getTime() === today.getTime();
@@ -1763,10 +1944,12 @@
                     dayDiv.classList.add('today');
                 }
                 
+                const dayTop = document.createElement('div');
+                dayTop.className = 'calendar-day-top';
                 const dayNumber = document.createElement('div');
                 dayNumber.className = 'calendar-day-number';
                 dayNumber.textContent = currentDate.getDate();
-                dayDiv.appendChild(dayNumber);
+                dayTop.appendChild(dayNumber);
                 
                 const eventsDiv = document.createElement('div');
                 eventsDiv.className = 'calendar-day-events';
@@ -1783,48 +1966,68 @@
                     });
                 }
                 
-                // D+이벤트 체크 (2026년 2월 7일 기준)
-                if (isCurrentMonth) {
-                    const daysDiff = Math.floor((currentDate - dDayBase) / (1000 * 60 * 60 * 24));
-                    if (daysDiff >= 0) {
-                        const years = Math.floor(daysDiff / 365);
-                        if (years > 0 && daysDiff % 365 === 0) {
-                            const event = document.createElement('div');
-                            event.className = 'calendar-event dday';
-                            event.textContent = `D+${daysDiff} (${years}년)`;
-                            event.title = `D+${daysDiff} (${years}년)`;
-                            eventsDiv.appendChild(event);
-                        } else if (daysDiff > 0 && daysDiff % 365 !== 0) {
-                            // 1년 미만이지만 특정 날짜 체크
-                            const event = document.createElement('div');
-                            event.className = 'calendar-event dday';
-                            event.textContent = `D+${daysDiff}`;
-                            event.title = `D+${daysDiff}`;
-                            eventsDiv.appendChild(event);
-                        }
+                // D-day 마일스톤: 날짜 옆에 표시 (100일마다 + 1주년·2주년·…)
+                (function() {
+                    var dBase = new Date(dDayBase.getFullYear(), dDayBase.getMonth(), dDayBase.getDate());
+                    dBase.setHours(0, 0, 0, 0);
+                    var cellDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+                    cellDay.setHours(0, 0, 0, 0);
+                    var daysFromBase = Math.round((cellDay - dBase) / (24 * 60 * 60 * 1000));
+                    var dPlus = daysFromBase + 1;
+                    var label = null;
+                    if (dPlus >= 365 && dPlus % 365 === 0)
+                        label = (dPlus / 365) + '*';
+                    else if (dPlus >= 100 && dPlus % 100 === 0)
+                        label = String(dPlus);
+                    if (label) {
+                        var ddayEl = document.createElement('span');
+                        ddayEl.className = 'calendar-event dday';
+                        ddayEl.textContent = label;
+                        ddayEl.title = label;
+                        dayTop.appendChild(ddayEl);
                     }
-                }
+                })();
                 
-                // 일정 체크
-                const dateKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDate()}`;
-                if (events[dateKey] && events[dateKey].length > 0) {
-                    const event = document.createElement('div');
-                    event.className = 'calendar-event schedule';
-                    const eventTitles = events[dateKey].map(e => e.title).join(', ');
-                    event.title = eventTitles;
-                    eventsDiv.appendChild(event);
-                }
+                dayDiv.appendChild(dayTop);
                 
                 // 날짜 클릭 이벤트 추가 (클로저로 해당 셀 날짜 복사본 전달 - 클릭한 날짜가 정확히 모달에 전달되도록)
                 if (isCurrentMonth) {
                     dayDiv.style.cursor = 'pointer';
                     const dateCopy = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-                    dayDiv.onclick = () => openEventModal(dateCopy);
+                    const dateKey = currentDate.getFullYear() + '-' + currentDate.getMonth() + '-' + currentDate.getDate();
+                    dayDiv.onclick = () => openEventModal(dateCopy, events[dateKey] || []);
                 }
                 
                 dayDiv.appendChild(eventsDiv);
                 calendarGrid.appendChild(dayDiv);
             }
+            
+            // 기간 일정 막대 그리기 (여러 날에 걸친 막대)
+            eventsListForBars.forEach(function(ev) {
+                var startIdx = Math.floor((ev.startDate.getTime() - gridStartTime) / oneDay);
+                var endIdx = Math.floor((ev.endDate.getTime() - gridStartTime) / oneDay);
+                if (startIdx < 0) startIdx = 0;
+                if (endIdx >= totalDays) endIdx = totalDays - 1;
+                if (startIdx > endIdx) return;
+                
+                var numRows = Math.ceil(totalDays / 7);
+                for (var r = 0; r < numRows; r++) {
+                    var rowStart = r * 7;
+                    var rowEnd = rowStart + 6;
+                    var segStart = Math.max(startIdx, rowStart);
+                    var segEnd = Math.min(endIdx, rowEnd);
+                    if (segStart > segEnd) continue;
+                    
+                    var bar = document.createElement('div');
+                    bar.className = 'calendar-event-bar';
+                    bar.style.gridRow = 2 + r;
+                    bar.style.gridColumn = (segStart % 7) + 1 + ' / span ' + (segEnd - segStart + 1);
+                    bar.style.background = ev.color;
+                    bar.textContent = ev.title;
+                    bar.title = ev.title;
+                    calendarGrid.appendChild(bar);
+                }
+            });
             
             // 일정 목록 표시
             loadEventsList();
@@ -1844,27 +2047,41 @@
             }
             
             const eventsData = eventsSnapshot.val();
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
             const eventsArray = Object.entries(eventsData)
-                .map(([id, event]) => ({
-                    id,
-                    ...event,
-                    date: parseLocalDate(event.date)
-                }))
-                .sort((a, b) => a.date - b.date);
+                .map(([id, event]) => {
+                    var start = parseLocalDate(event.startDate || event.date);
+                    var end = parseLocalDate(event.endDate || event.date);
+                    return {
+                        id,
+                        ...event,
+                        startDate: start,
+                        endDate: end,
+                        date: start
+                    };
+                })
+                .filter(function(event) {
+                    var endDay = new Date(event.endDate.getFullYear(), event.endDate.getMonth(), event.endDate.getDate());
+                    return endDay.getTime() >= todayStart.getTime();
+                })
+                .sort((a, b) => a.startDate - b.startDate);
             
             eventsArray.forEach(event => {
                 const eventDiv = document.createElement('div');
                 eventDiv.className = 'event-item';
                 
-                const dateStr = event.date.toLocaleDateString('ko-KR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
+                var dateStr;
+                if (event.startDate.getTime() === event.endDate.getTime()) {
+                    dateStr = event.startDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+                } else {
+                    dateStr = event.startDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' }) + ' ~ ' + event.endDate.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+                }
                 
                 const currentUserName = localStorage.getItem('bamboo_userName');
+                const isAdmin = localStorage.getItem('bamboo_isAdmin') === 'true';
                 const isOwner = event.author === currentUserName;
-                const deleteBtn = isOwner ? `<button class="event-delete-btn" onclick="deleteEvent('${event.id}')">삭제</button>` : '';
+                const deleteBtn = (isOwner || isAdmin) ? `<button class="event-delete-btn" onclick="deleteEvent('${event.id}')">삭제</button>` : '';
                 
                 eventDiv.innerHTML = `
                     <div class="event-item-header">
@@ -1879,31 +2096,55 @@
             });
         }
         
-        // 일정 모달 열기
-        window.openEventModal = function(date) {
+        // 일정 모달 열기 (해당 날짜에 일정이 있으면 수정 모드)
+        window.openEventModal = function(date, eventsOnDate) {
             const modal = document.getElementById('eventModal');
             const dateInput = document.getElementById('eventDate');
+            const startInput = document.getElementById('eventStartDate');
+            const endInput = document.getElementById('eventEndDate');
             const titleInput = document.getElementById('eventTitle');
             const descInput = document.getElementById('eventDescription');
+            const eventIdInput = document.getElementById('eventId');
+            const submitBtn = document.getElementById('eventSubmitBtn');
             
-            // 로컬 날짜만 사용 (시간/UTC 무관). YYYY-MM-DD 형식으로 저장·표시 통일
             const y = date.getFullYear();
             const m = date.getMonth();
             const d = date.getDate();
-            const year = y;
             const month = String(m + 1).padStart(2, '0');
             const day = String(d).padStart(2, '0');
-            dateInput.value = `${year}-${month}-${day}`;
+            const dateStr = `${y}-${month}-${day}`;
+            dateInput.value = dateStr;
             
-            titleInput.value = '';
-            descInput.value = '';
-            
-            const dateStr = date.toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            document.getElementById('eventModalTitle').textContent = `${dateStr} 일정 추가`;
+            if (eventsOnDate && eventsOnDate.length > 0) {
+                var ev = eventsOnDate[0];
+                eventIdInput.value = ev.id;
+                startInput.value = (ev.startDateStr || '').indexOf('T') !== -1 ? ev.startDateStr.substring(0, 10) : (ev.startDateStr || dateStr);
+                endInput.value = (ev.endDateStr || '').indexOf('T') !== -1 ? ev.endDateStr.substring(0, 10) : (ev.endDateStr || dateStr);
+                titleInput.value = ev.title || '';
+                descInput.value = ev.description || '';
+                var color = ev.eventColor || ev.color || '#90EE90';
+                document.getElementById('eventColor').value = color;
+                document.querySelectorAll('.event-color-circle').forEach(function(btn) {
+                    btn.classList.toggle('selected', btn.getAttribute('data-color') === color);
+                });
+                document.getElementById('eventModalTitle').textContent = '일정 수정';
+                submitBtn.textContent = '수정';
+                document.getElementById('eventDeleteBtn').style.display = 'block';
+            } else {
+                eventIdInput.value = '';
+                startInput.value = dateStr;
+                endInput.value = dateStr;
+                document.getElementById('eventColor').value = '#90EE90';
+                document.querySelectorAll('.event-color-circle').forEach(function(btn) {
+                    btn.classList.toggle('selected', btn.getAttribute('data-color') === '#90EE90');
+                });
+                titleInput.value = '';
+                descInput.value = '';
+                var dateLabel = date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+                document.getElementById('eventModalTitle').textContent = dateLabel + ' 일정 추가';
+                submitBtn.textContent = '일정 추가';
+                document.getElementById('eventDeleteBtn').style.display = 'none';
+            }
             
             modal.classList.add('show');
         };
@@ -1920,46 +2161,100 @@
             }
         });
         
-        // 일정 추가
+        document.querySelectorAll('.event-color-circle').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var color = this.getAttribute('data-color');
+                document.getElementById('eventColor').value = color;
+                document.querySelectorAll('.event-color-circle').forEach(function(b) { b.classList.remove('selected'); });
+                this.classList.add('selected');
+            });
+        });
+        
+        document.querySelectorAll('.event-d-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var startInput = document.getElementById('eventStartDate');
+                var endInput = document.getElementById('eventEndDate');
+                var startStr = startInput.value;
+                if (!startStr || startStr.length < 10) return;
+                if (startStr.indexOf('T') !== -1) startStr = startStr.substring(0, 10);
+                var days = parseInt(this.getAttribute('data-days'), 10) || 0;
+                var d = new Date(startStr);
+                d.setDate(d.getDate() + days);
+                var y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0');
+                endInput.value = y + '-' + m + '-' + day;
+            });
+        });
+        
+        // 일정 추가 / 수정
         document.getElementById('eventForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            var rawDate = document.getElementById('eventDate').value;
-            var dateStr = (rawDate && String(rawDate).indexOf('T') !== -1) ? rawDate.substring(0, 10) : (rawDate || '');
+            var startStr = document.getElementById('eventStartDate').value;
+            var endStr = document.getElementById('eventEndDate').value;
+            if (startStr && startStr.indexOf('T') !== -1) startStr = startStr.substring(0, 10);
+            if (endStr && endStr.indexOf('T') !== -1) endStr = endStr.substring(0, 10);
+            
             const title = document.getElementById('eventTitle').value.trim();
             const description = document.getElementById('eventDescription').value.trim();
+            const eventId = document.getElementById('eventId').value.trim();
             
             if (!title) {
                 alert('일정 제목을 입력해주세요.');
                 return;
             }
+            if (!startStr || !endStr) {
+                alert('시작일과 종료일을 선택해주세요.');
+                return;
+            }
+            if (startStr > endStr) {
+                alert('종료일은 시작일 이후로 선택해주세요.');
+                return;
+            }
             
             try {
                 const userName = localStorage.getItem('bamboo_userName');
-                const eventsRef = ref(database, 'events');
-                const newEventRef = push(eventsRef);
+                const eventColor = document.getElementById('eventColor').value || '#90EE90';
                 
-                await set(newEventRef, {
-                    date: dateStr,
-                    title: title,
-                    description: description || '',
-                    author: userName,
-                    createdAt: new Date().toISOString()
-                });
-                
-                // 일정 추가 시 알림 트리거
-                await sendNotificationToUsers({
-                    title: '새 일정이 등록되었습니다',
-                    body: `${userName}님이 "${title}" 일정을 추가했습니다.`,
-                    type: 'event',
-                    eventId: newEventRef.key
-                });
-                
-                closeEventModal();
-                renderCalendar();
-                alert('일정이 추가되었습니다!');
+                if (eventId) {
+                    const eventRef = ref(database, 'events/' + eventId);
+                    await update(eventRef, {
+                        startDate: startStr,
+                        endDate: endStr,
+                        date: startStr,
+                        title: title,
+                        description: description || '',
+                        eventColor: eventColor
+                    });
+                    closeEventModal();
+                    renderCalendar();
+                    loadEventsList();
+                    alert('일정이 수정되었습니다.');
+                } else {
+                    const eventsRef = ref(database, 'events');
+                    const newEventRef = push(eventsRef);
+                    await set(newEventRef, {
+                        startDate: startStr,
+                        endDate: endStr,
+                        date: startStr,
+                        title: title,
+                        description: description || '',
+                        author: userName,
+                        eventColor: eventColor,
+                        createdAt: new Date().toISOString()
+                    });
+                    await sendNotificationToUsers({
+                        title: '새 일정이 등록되었습니다',
+                        body: `${userName}님이 "${title}" 일정을 추가했습니다.`,
+                        type: 'event',
+                        eventId: newEventRef.key
+                    });
+                    closeEventModal();
+                    renderCalendar();
+                    loadEventsList();
+                    alert('일정이 추가되었습니다!');
+                }
             } catch (error) {
-                alert('일정 추가에 실패했습니다.');
+                alert(eventId ? '일정 수정에 실패했습니다.' : '일정 추가에 실패했습니다.');
             }
         });
         
@@ -1978,6 +2273,16 @@
                 alert('일정 삭제에 실패했습니다.');
             }
         };
+        
+        // 일정 모달에서 삭제 버튼 (한 번 더 확인)
+        document.getElementById('eventDeleteBtn').addEventListener('click', function() {
+            var eventId = document.getElementById('eventId').value.trim();
+            if (!eventId) return;
+            if (!confirm('정말 이 일정을 삭제하시겠습니까?')) return;
+            if (!confirm('삭제하면 복구할 수 없습니다. 다시 한 번 삭제하시겠습니까?')) return;
+            deleteEvent(eventId);
+            closeEventModal();
+        });
         
         // 월 변경
         window.changeMonth = function(direction) {
