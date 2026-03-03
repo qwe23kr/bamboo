@@ -6,9 +6,9 @@
     <meta name="theme-color" content="#ff69b4">
     <meta name="description" content="밤부 - 대나무숲 커뮤니티">
     <title>밤부 - 메인</title>
-    <link rel="manifest" href="/bamboo/manifest.json">
-    <link rel="icon" type="image/png" href="/bamboo/icon-192.png">
-    <link rel="apple-touch-icon" href="/bamboo/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
@@ -364,11 +364,13 @@
             display: flex;
             flex-direction: row;
             flex-wrap: nowrap;
-            transition: transform 0.3s ease;
+            transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             will-change: transform;
             cursor: grab;
             overflow: visible;
-            touch-action: none;
+            touch-action: pan-y;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .post-media-slider-container:active {
@@ -819,6 +821,99 @@
             padding: 50px;
             font-size: 1.1em;
             font-weight: 400;
+        }
+        
+        /* 일상로그 사진첩 */
+        .daily-photo-album {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 10px;
+        }
+        .daily-photo-item {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f8f0f2;
+            cursor: pointer;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .daily-photo-item img,
+        .daily-photo-item .daily-photo-placeholder {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        .daily-photo-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff69b4;
+            font-size: 2em;
+        }
+        .daily-photo-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        /* 일상로그 상세 모달 */
+        .daily-detail-modal .modal-content {
+            max-width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .daily-detail-content {
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #333;
+        }
+        .daily-detail-media {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .daily-detail-media-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: visible;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .daily-detail-media-item img {
+            max-width: 100%;
+            width: auto;
+            height: auto;
+            display: block;
+            object-fit: contain;
+        }
+        .daily-detail-media-item video {
+            max-width: 100%;
+            width: auto;
+            height: auto;
+            display: block;
+        }
+        .daily-detail-media-item .longpress-hint {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            pointer-events: none;
+        }
+        .daily-detail-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
         }
         
         /* 달력 스타일 */
@@ -1601,6 +1696,24 @@
     <!-- 플로팅 + 버튼 -->
     <button id="floatingAddBtn" class="floating-add-btn" onclick="openWriteModal()">+</button>
     
+    <!-- 일상로그 상세 모달 (사진+내용 보기, 사진 꾹 누르면 다운로드) -->
+    <div id="dailyDetailModal" class="modal daily-detail-modal" data-detail-post-id="" data-detail-tab="daily">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="dailyDetailTitle">일상로그</h2>
+                <button type="button" class="close-btn" onclick="closeDailyDetailModal()">&times;</button>
+            </div>
+            <div id="dailyDetailActions" class="daily-detail-actions" style="display:none;">
+                <button type="button" class="edit-btn" id="dailyDetailEditBtn">수정</button>
+                <button type="button" class="delete-btn" id="dailyDetailDeleteBtn">삭제</button>
+            </div>
+            <div id="dailyDetailBody">
+                <div id="dailyDetailContent" class="daily-detail-content" style="margin-bottom:12px;"></div>
+                <div id="dailyDetailMedia" class="daily-detail-media"></div>
+            </div>
+        </div>
+    </div>
+    
     <!-- 글 작성 모달 -->
     <div id="writeModal" class="modal">
         <div class="modal-content">
@@ -2308,12 +2421,170 @@
                     return new Date(b[1].createdAt) - new Date(a[1].createdAt);
                 });
                 
+                if (tabName === 'daily') {
+                    postsContainer.className = 'daily-photo-album';
+                    postsArray.forEach(([postId, post]) => {
+                        const item = document.createElement('div');
+                        item.className = 'daily-photo-item';
+                        item.dataset.postId = postId;
+                        item.dataset.tab = tabName;
+                        if (post.media && post.media.length > 0) {
+                            const first = post.media[0];
+                            if (first.type === 'video') {
+                                item.innerHTML = '<video src="' + first.url + '" muted></video>';
+                            } else {
+                                item.innerHTML = '<img src="' + first.url + '" alt="">';
+                            }
+                        } else {
+                            item.innerHTML = '<div class="daily-photo-placeholder">📝</div>';
+                        }
+                        item.addEventListener('click', function() { openDailyDetailModal(postId, post, tabName); });
+                        postsContainer.appendChild(item);
+                    });
+                    return;
+                }
+                
+                postsContainer.className = 'posts-container';
                 postsArray.forEach(([postId, post]) => {
                     const postElement = createPostElement(postId, post, tabName);
                     postsContainer.appendChild(postElement);
                 });
             });
         }
+        
+        window.openDailyDetailModal = function(postId, post, tabName) {
+            tabName = tabName || 'daily';
+            var modal = document.getElementById('dailyDetailModal');
+            var titleEl = document.getElementById('dailyDetailTitle');
+            var contentEl = document.getElementById('dailyDetailContent');
+            var mediaEl = document.getElementById('dailyDetailMedia');
+            var actionsEl = document.getElementById('dailyDetailActions');
+            var editBtn = document.getElementById('dailyDetailEditBtn');
+            var deleteBtn = document.getElementById('dailyDetailDeleteBtn');
+            
+            modal.dataset.detailPostId = postId;
+            modal.dataset.detailTab = tabName;
+            
+            var currentUserName = localStorage.getItem('bamboo_userName');
+            var isAdmin = localStorage.getItem('bamboo_isAdmin') === 'true';
+            var isOwner = post.author === currentUserName;
+            if (isOwner || isAdmin) {
+                actionsEl.style.display = 'flex';
+                editBtn.onclick = function() {
+                    closeDailyDetailModal();
+                    editPost(postId, tabName);
+                };
+                deleteBtn.onclick = function() {
+                    closeDailyDetailModal();
+                    deletePost(postId, tabName);
+                };
+                if (!isOwner && isAdmin) {
+                    editBtn.style.display = 'none';
+                    deleteBtn.style.display = 'inline-block';
+                } else {
+                    editBtn.style.display = 'inline-block';
+                    deleteBtn.style.display = 'inline-block';
+                }
+            } else {
+                actionsEl.style.display = 'none';
+            }
+            
+            var date = new Date(post.createdAt);
+            var dateStr = date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            titleEl.textContent = post.author + ' · ' + dateStr;
+            contentEl.textContent = post.content || '';
+            contentEl.style.display = post.content ? 'block' : 'none';
+            mediaEl.innerHTML = '';
+            
+            if (post.media && post.media.length > 0) {
+                if (post.media.length > 1) {
+                    var sliderId = 'daily-detail-slider';
+                    var n = post.media.length;
+                    var itemPct = (100 / n).toFixed(2);
+                    var containerWidthPct = n * 100;
+                    var sliderHTML = '<div class="post-media-slider" id="' + sliderId + '">';
+                    sliderHTML += '<div class="post-media-slider-container" style="width:' + containerWidthPct + '%">';
+                    for (var i = 0; i < post.media.length; i++) {
+                        var m = post.media[i];
+                        var itemStyle = 'flex:0 0 ' + itemPct + '%;width:' + itemPct + '%;min-width:' + itemPct + '%;';
+                        if (m.type === 'video') {
+                            sliderHTML += '<div class="post-media-slider-item daily-detail-slide-item" style="' + itemStyle + '"><video controls><source src="' + m.url + '" type="video/mp4"></video></div>';
+                        } else {
+                            sliderHTML += '<div class="post-media-slider-item daily-detail-slide-item" style="' + itemStyle + '"><img src="' + m.url + '" alt="이미지 ' + (i + 1) + '" data-download-url="' + m.url + '" data-download-name="image-' + (i + 1) + '.jpg"></div>';
+                        }
+                    }
+                    sliderHTML += '</div>';
+                    sliderHTML += '<div class="post-media-slider-indicators">';
+                    for (var j = 0; j < post.media.length; j++) {
+                        sliderHTML += '<span class="post-media-slider-indicator' + (j === 0 ? ' active' : '') + '" data-index="' + j + '"></span>';
+                    }
+                    sliderHTML += '</div>';
+                    sliderHTML += '<div class="post-media-slider-counter">1 / ' + post.media.length + '</div>';
+                    sliderHTML += '<button class="post-media-slider-nav prev" onclick="slideMedia(\'' + sliderId + '\', -1)">‹</button>';
+                    sliderHTML += '<button class="post-media-slider-nav next" onclick="slideMedia(\'' + sliderId + '\', 1)">›</button>';
+                    sliderHTML += '</div>';
+                    mediaEl.innerHTML = sliderHTML;
+                    mediaEl.querySelectorAll('.daily-detail-slide-item img').forEach(function(img) {
+                        var url = img.getAttribute('data-download-url');
+                        var name = img.getAttribute('data-download-name') || 'image.jpg';
+                        setupLongPressDownload(img, url, name);
+                    });
+                    setTimeout(function() { initMediaSlider(sliderId, post.media.length); }, 150);
+                } else {
+                    var m = post.media[0];
+                    var wrap = document.createElement('div');
+                    wrap.className = 'daily-detail-media-item';
+                    if (m.type === 'video') {
+                        wrap.innerHTML = '<video controls><source src="' + m.url + '" type="video/mp4"></video>';
+                    } else {
+                        var img = document.createElement('img');
+                        img.src = m.url;
+                        img.alt = '이미지 1';
+                        wrap.appendChild(img);
+                        var hint = document.createElement('span');
+                        hint.className = 'longpress-hint';
+                        hint.textContent = '사진을 꾹 누르면 다운로드';
+                        wrap.appendChild(hint);
+                        setupLongPressDownload(img, m.url, 'image-1.jpg');
+                    }
+                    mediaEl.appendChild(wrap);
+                }
+            }
+            modal.classList.add('show');
+        };
+        
+        function setupLongPressDownload(el, url, filename) {
+            var pressTimer = null;
+            el.addEventListener('touchstart', function() {
+                pressTimer = setTimeout(function() { downloadMediaUrl(url, filename); }, 500);
+            });
+            el.addEventListener('touchend', function() { clearTimeout(pressTimer); });
+            el.addEventListener('touchmove', function() { clearTimeout(pressTimer); });
+            el.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                downloadMediaUrl(url, filename);
+            });
+        }
+        
+        function downloadMediaUrl(url, filename) {
+            fetch(url, { mode: 'cors' }).then(function(r) { return r.blob(); }).then(function(blob) {
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = filename || 'download';
+                a.click();
+                URL.revokeObjectURL(a.href);
+            }).catch(function() {
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = filename || 'download';
+                a.target = '_blank';
+                a.click();
+            });
+        }
+        
+        window.closeDailyDetailModal = function() {
+            document.getElementById('dailyDetailModal').classList.remove('show');
+        };
         
         // 줄바꿈·띄어쓰기 보존 (모바일 포함) — HTML 이스케이프 후 \n을 <br>로
         function formatContentForDisplay(text) {
@@ -2549,81 +2820,89 @@
                 var diffY = touchStartY - curY;
                 if (!directionLocked) {
                     var ax = Math.abs(diffX), ay = Math.abs(diffY);
-                    if (ax > 6 || ay > 6) {
+                    if (ax > 8 || ay > 8) {
                         directionLocked = true;
                         isHorizontalSwipe = ax >= ay;
                     }
                 }
                 if (isHorizontalSwipe) {
-                    e.preventDefault();
+                    if (e.cancelable) e.preventDefault();
                     var w = slider.offsetWidth || slideWidthPx || 1;
-                    container.style.transform = 'translateX(' + (-currentIndex * w + diffX) + 'px)';
+                    var nextT = -currentIndex * w - diffX;
+                    container.style.transform = 'translateX(' + nextT + 'px)';
                 }
             }, { passive: false, capture: true });
             
             container.addEventListener('touchend', (e) => {
                 if (!isDragging) return;
-                isDragging = false;
-                container.style.transition = 'transform 0.3s ease'; // transition 복원
-                
-                if (!isHorizontalSwipe) return;
-                
                 touchEndX = e.changedTouches[0].clientX;
-                const diff = touchStartX - touchEndX;
-                const threshold = 50;
-                var w = slider.offsetWidth || slideWidthPx || 1;
-                const swipeRatio = Math.abs(diff) / w;
+                var diff = touchStartX - touchEndX;
+                isDragging = false;
+                container.style.transition = 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                 
-                if (Math.abs(diff) > threshold || swipeRatio > 0.2) {
-                    if (diff > 0 && currentIndex < totalItems - 1) {
-                        // 왼쪽으로 스와이프 (다음)
-                        goToSlide(currentIndex + 1);
-                    } else if (diff < 0 && currentIndex > 0) {
-                        // 오른쪽으로 스와이프 (이전)
-                        goToSlide(currentIndex - 1);
-                    } else {
-                        // 원래 위치로 복귀
-                        goToSlide(currentIndex);
-                    }
-                } else {
-                    // 원래 위치로 복귀
-                    goToSlide(currentIndex);
+                if (!isHorizontalSwipe) {
+                    requestAnimationFrame(function() { goToSlide(currentIndex); });
+                    return;
                 }
+                
+                var w = slider.offsetWidth || slideWidthPx || 1;
+                var threshold = Math.max(35, w * 0.12);
+                var swipeRatio = Math.abs(diff) / w;
+                
+                var targetIndex = currentIndex;
+                if (Math.abs(diff) > threshold || swipeRatio > 0.15) {
+                    if (diff > 0 && currentIndex < totalItems - 1) targetIndex = currentIndex + 1;
+                    else if (diff < 0 && currentIndex > 0) targetIndex = currentIndex - 1;
+                }
+                requestAnimationFrame(function() { goToSlide(targetIndex); });
             }, { passive: true });
             
-            // 마우스 드래그 이벤트 (데스크톱)
-            container.addEventListener('mousedown', (e) => {
-                startX = e.clientX;
-                isDragging = true;
-                container.style.cursor = 'grabbing';
-            });
-            
-            container.addEventListener('mousemove', (e) => {
+            // 마우스 드래그 이벤트 (데스크톱) - 드래그 시 슬라이드가 커서를 따라감
+            var mouseMoveHandler = function(e) {
                 if (!isDragging) return;
-                e.preventDefault();
                 currentX = e.clientX;
-            });
-            
-            container.addEventListener('mouseup', () => {
+                var w = slider.offsetWidth || slideWidthPx || 1;
+                var dragOffset = startX - currentX;
+                var nextT = -currentIndex * w - dragOffset;
+                container.style.transform = 'translateX(' + nextT + 'px)';
+            };
+            var mouseUpHandler = function() {
                 if (!isDragging) return;
                 isDragging = false;
+                container.style.transition = 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                 container.style.cursor = 'grab';
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
                 
-                const diff = startX - currentX;
-                const threshold = 50;
+                var diff = startX - currentX;
+                var w = slider.offsetWidth || slideWidthPx || 1;
+                var threshold = Math.max(40, w * 0.12);
                 
+                var targetIndex = currentIndex;
                 if (Math.abs(diff) > threshold) {
-                    if (diff > 0 && currentIndex < totalItems - 1) {
-                        goToSlide(currentIndex + 1);
-                    } else if (diff < 0 && currentIndex > 0) {
-                        goToSlide(currentIndex - 1);
-                    }
+                    if (diff > 0 && currentIndex < totalItems - 1) targetIndex = currentIndex + 1;
+                    else if (diff < 0 && currentIndex > 0) targetIndex = currentIndex - 1;
                 }
+                requestAnimationFrame(function() { goToSlide(targetIndex); });
+            };
+            
+            container.addEventListener('mousedown', function(e) {
+                if (e.button !== 0) return;
+                e.preventDefault();
+                startX = e.clientX;
+                currentX = startX;
+                isDragging = true;
+                container.style.transition = 'none';
+                container.style.cursor = 'grabbing';
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler, { once: true });
             });
             
             container.addEventListener('mouseleave', () => {
-                isDragging = false;
-                container.style.cursor = 'grab';
+                if (isDragging) {
+                    document.removeEventListener('mousemove', mouseMoveHandler);
+                    mouseUpHandler();
+                }
             });
             
             // 초기 상태 설정
@@ -2651,6 +2930,7 @@
             const newIndex = currentIndex + direction;
             if (newIndex < 0 || newIndex >= totalItems) return;
             
+            container.style.transition = 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
             container.style.transform = 'translateX(-' + (newIndex * w) + 'px)';
             
             indicators.forEach((indicator, index) => {
@@ -3353,23 +3633,28 @@ const img = new Image();
                     }
                 }
                 
-                // 글 저장/수정
+                // 글 저장/수정 (수정 시 update 사용 → 댓글 유지)
                 submitBtn.textContent = isEditMode ? '수정 중...' : '저장 중...';
-                const postData = {
-                    author: userName,
-                    createdAt: isEditMode ? (await get(postRef)).val().createdAt : new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                };
-                
-                if (content) {
-                    postData.content = content;
+                if (isEditMode) {
+                    const updateData = {
+                        author: userName,
+                        content: content || '',
+                        updatedAt: new Date().toISOString()
+                    };
+                    if (currentTab === 'daily') {
+                        updateData.media = mediaUrls;
+                    }
+                    await update(postRef, updateData);
+                } else {
+                    const postData = {
+                        author: userName,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+                    if (content) postData.content = content;
+                    if (currentTab === 'daily' && mediaUrls.length > 0) postData.media = mediaUrls;
+                    await set(postRef, postData);
                 }
-                
-                if (currentTab === 'daily' && mediaUrls.length > 0) {
-                    postData.media = mediaUrls;
-                }
-                
-                await set(postRef, postData);
                 
                 // 새 글 작성 시 알림 트리거 (수정이 아닐 때만)
                 if (!isEditMode) {
