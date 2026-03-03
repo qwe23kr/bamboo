@@ -2642,9 +2642,9 @@
                         if (post.media && post.media.length > 0) {
                             const first = post.media[0];
                             if (first.type === 'video') {
-                                item.innerHTML = '<video src="' + first.url + '" muted></video>';
+                                item.innerHTML = '<video src="' + first.url + '" muted preload="metadata" playsinline></video>';
                             } else {
-                                item.innerHTML = '<img src="' + first.url + '" alt="">';
+                                item.innerHTML = '<img src="' + first.url + '" alt="" loading="lazy" decoding="async">';
                             }
                         } else {
                             item.innerHTML = '<div class="daily-photo-placeholder">📝</div>';
@@ -2670,7 +2670,7 @@
                         var dateStr = date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                         var iconHtml = '';
                         if (window.authorIconMap && window.authorIconMap[post.author]) {
-                            iconHtml = '<img class="post-grid-icon-img" src="' + window.authorIconMap[post.author] + '" alt="">';
+                            iconHtml = '<img class="post-grid-icon-img" src="' + window.authorIconMap[post.author] + '" alt="" loading="lazy" decoding="async">';
                         } else {
                             iconHtml = '<span class="post-grid-icon">' + (tabIcons[tabName] || '📝') + '</span>';
                         }
@@ -2751,7 +2751,7 @@
                         if (m.type === 'video') {
                             sliderHTML += '<div class="post-media-slider-item daily-detail-slide-item" style="' + itemStyle + '"><video controls><source src="' + m.url + '" type="video/mp4"></video></div>';
                         } else {
-                            sliderHTML += '<div class="post-media-slider-item daily-detail-slide-item" style="' + itemStyle + '"><img src="' + m.url + '" alt="이미지 ' + (i + 1) + '" data-download-url="' + m.url + '" data-download-name="image-' + (i + 1) + '.jpg"></div>';
+                            sliderHTML += '<div class="post-media-slider-item daily-detail-slide-item" style="' + itemStyle + '"><img src="' + m.url + '" alt="이미지 ' + (i + 1) + '" loading="lazy" decoding="async" data-download-url="' + m.url + '" data-download-name="image-' + (i + 1) + '.jpg"></div>';
                         }
                     }
                     sliderHTML += '</div>';
@@ -2781,6 +2781,8 @@
                         var img = document.createElement('img');
                         img.src = m.url;
                         img.alt = '이미지 1';
+                        img.loading = 'lazy';
+                        img.decoding = 'async';
                         wrap.appendChild(img);
                         var hint = document.createElement('span');
                         hint.className = 'longpress-hint';
@@ -2923,7 +2925,7 @@
                     if (post.media[0].type === 'video') {
                         mediaHTML = `<div class="post-media"><video controls><source src="${post.media[0].url}" type="video/mp4"></video></div>`;
                     } else {
-                        mediaHTML = `<div class="post-media"><img src="${post.media[0].url}" alt="이미지"></div>`;
+                        mediaHTML = `<div class="post-media"><img src="${post.media[0].url}" alt="이미지" loading="lazy" decoding="async"></div>`;
                     }
                 } else {
                     // 여러 이미지일 때 슬라이드로 표시 (HTML에 인라인 레이아웃 적용 → JS 없이도 모바일에서 가로 한 줄 표시)
@@ -2938,7 +2940,7 @@
                         if (media.type === 'video') {
                             mediaHTML += '<div class="post-media-slider-item" style="' + itemStyle + '"><video controls><source src="' + media.url + '" type="video/mp4"></video></div>';
                         } else {
-                            mediaHTML += '<div class="post-media-slider-item" style="' + itemStyle + '"><img src="' + media.url + '" alt="이미지 ' + (index + 1) + '"></div>';
+                            mediaHTML += '<div class="post-media-slider-item" style="' + itemStyle + '"><img src="' + media.url + '" alt="이미지 ' + (index + 1) + '" loading="lazy" decoding="async"></div>';
                         }
                     });
                     mediaHTML += '</div>';
