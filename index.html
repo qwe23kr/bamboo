@@ -137,6 +137,84 @@
             margin-right: 8px;
         }
         
+        .btn-profile-link {
+            background: transparent;
+            border: none;
+            color: #ff69b4;
+            font-size: 0.85em;
+            cursor: pointer;
+            padding: 4px 8px;
+            margin-right: 6px;
+            font-family: 'Yanolja', sans-serif;
+            text-decoration: underline;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-profile-link:hover {
+            color: #ff1493;
+        }
+        
+        .user-dropdown {
+            position: relative;
+        }
+        .user-dropdown-trigger {
+            background: transparent;
+            border: none;
+            color: #ff69b4;
+            font-weight: 500;
+            font-size: 0.95em;
+            cursor: pointer;
+            padding: 6px 10px;
+            font-family: 'Yanolja', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .user-dropdown-trigger:hover {
+            color: #ff1493;
+        }
+        .user-dropdown-trigger::after {
+            content: '▼';
+            font-size: 0.65em;
+            opacity: 0.8;
+        }
+        .user-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            min-width: 140px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(255, 105, 180, 0.25);
+            border: 1px solid #ffd9e6;
+            padding: 6px 0;
+            z-index: 1000;
+            display: none;
+        }
+        .user-dropdown-menu.show {
+            display: block;
+        }
+        .user-dropdown-menu button,
+        .user-dropdown-menu a {
+            display: block;
+            width: 100%;
+            padding: 10px 16px;
+            border: none;
+            background: none;
+            text-align: left;
+            font-family: 'Yanolja', sans-serif;
+            font-size: 0.95em;
+            color: #333;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .user-dropdown-menu button:hover,
+        .user-dropdown-menu a:hover {
+            background: #fff0f5;
+            color: #ff69b4;
+        }
+        
         .btn {
             padding: 10px 18px;
             border: none;
@@ -858,6 +936,65 @@
             height: 100%;
             object-fit: contain;
         }
+        
+        /* 칭찬하기/민원제기/메모장 바둑판 그리드 */
+        .post-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 10px;
+        }
+        @media (min-width: 768px) {
+            .post-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .post-grid-item {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.15);
+            border: 1px solid #ffd9e6;
+            cursor: pointer;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            -webkit-tap-highlight-color: transparent;
+            overflow: hidden;
+        }
+        .post-grid-item:hover {
+            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.25);
+        }
+        .post-grid-item .post-grid-icon {
+            font-size: 1.8em;
+            margin-bottom: 6px;
+            flex-shrink: 0;
+        }
+        .post-grid-item .post-grid-icon-img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            margin-bottom: 6px;
+            flex-shrink: 0;
+        }
+        .post-grid-item .post-grid-preview {
+            flex: 1;
+            font-size: 0.85em;
+            color: #555;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-break: break-word;
+        }
+        .post-grid-item .post-grid-meta {
+            font-size: 0.75em;
+            color: #999;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+        
         /* 일상로그 상세 모달 */
         .daily-detail-modal .modal-content {
             max-width: 95%;
@@ -914,6 +1051,24 @@
             gap: 8px;
             margin-bottom: 12px;
             flex-wrap: wrap;
+        }
+        .detail-header-small {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: normal;
+            color: #555;
+        }
+        .detail-header-small .detail-header-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: contain;
+        }
+        .detail-header-small .detail-header-date {
+            color: #888;
+            font-size: 0.85em;
         }
         
         /* 달력 스타일 */
@@ -1589,12 +1744,18 @@
 </head>
 <body>
     <div class="header">
-        <div class="logo">✨ 밤부 ✨ - 대나무숲</div>
+        <div class="logo">두근두근 대나무숲 ✨</div>
         <div class="user-info">
             <span class="dday-header" id="dDayHeader"></span>
-            <span class="user-name" id="userName">로딩 중...</span>
-            <button id="approveBtn" class="btn btn-pink" onclick="openUserManagementModal()" style="display: none;">사용자 관리</button>
-            <button class="btn-logout" id="logoutBtn">로그아웃</button>
+            <div class="user-dropdown">
+                <button type="button" class="user-dropdown-trigger" id="userDropdownTrigger" aria-expanded="false" aria-haspopup="true">
+                    <span class="user-name" id="userName">로딩 중...</span>
+                </button>
+                <div class="user-dropdown-menu" id="userDropdownMenu">
+                    <button type="button" id="userManagementDropdownBtn" style="display: none;" onclick="openUserManagementModal(); closeUserDropdown();">사용자 관리</button>
+                    <button type="button" onclick="logout(); closeUserDropdown();">로그아웃</button>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -1700,7 +1861,7 @@
     <div id="dailyDetailModal" class="modal daily-detail-modal" data-detail-post-id="" data-detail-tab="daily">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title" id="dailyDetailTitle">일상로그</h2>
+                <div id="dailyDetailTitle" class="detail-header-small">일상로그</div>
                 <button type="button" class="close-btn" onclick="closeDailyDetailModal()">&times;</button>
             </div>
             <div id="dailyDetailActions" class="daily-detail-actions" style="display:none;">
@@ -1710,6 +1871,9 @@
             <div id="dailyDetailBody">
                 <div id="dailyDetailContent" class="daily-detail-content" style="margin-bottom:12px;"></div>
                 <div id="dailyDetailMedia" class="daily-detail-media"></div>
+                <div id="dailyDetailCommentsWrap" class="comments-section" style="display:none; margin-top:16px;">
+                    <div id="dailyDetailCommentsContainer"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -1754,7 +1918,7 @@
         </div>
     </div>
     
-    <!-- 사용자 수정 모달 -->
+    <!-- 사용자 수정 모달 (관리자: 아이콘 파일 업로드 포함) -->
     <div id="editUserModal" class="modal">
         <div class="modal-content" style="max-width: 400px;">
             <h2 class="modal-title">사용자 정보 수정</h2>
@@ -1771,6 +1935,11 @@
                 <div class="form-group">
                     <label>핸드폰 번호</label>
                     <input type="tel" id="editUserPhone" placeholder="010-1234-5678">
+                </div>
+                <div class="form-group">
+                    <label>프로필 아이콘</label>
+                    <div id="editUserIconPreview" style="margin-bottom:8px; min-height:32px;"></div>
+                    <input type="file" id="editUserIconInput" accept="image/*,.ico" style="width:100%; padding:6px;">
                 </div>
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="submit" class="btn btn-pink" style="flex: 1;">저장</button>
@@ -1843,12 +2012,55 @@
             window.location.href = 'login.html';
         };
         
-        // 로그아웃 버튼 이벤트 리스너
-        document.addEventListener('DOMContentLoaded', () => {
-            const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', logout);
+        window.authorIconMap = {};
+        async function loadAuthorIcons() {
+            try {
+                const usersRef = ref(database, 'users');
+                const snapshot = await get(usersRef);
+                window.authorIconMap = {};
+                if (snapshot.exists()) {
+                    const users = snapshot.val();
+                    Object.values(users).forEach(function(u) {
+                        if (u.name && u.icon) window.authorIconMap[u.name] = u.icon;
+                    });
+                }
+            } catch (e) {}
+        }
+        
+        function formatDetailDate(d) {
+            var pad = function(n) { return (n < 10 ? '0' : '') + n; };
+            return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + ' ' + pad(d.getHours());
+        }
+        
+        function setDetailHeader(titleEl, authorName, dateStr) {
+            var icon = window.authorIconMap && window.authorIconMap[authorName];
+            var html = '<span>' + (authorName || '') + '</span>';
+            if (icon) html += '<img class="detail-header-icon" src="' + icon + '" alt="">';
+            html += '<span class="detail-header-date">' + dateStr + '</span>';
+            titleEl.innerHTML = html;
+            titleEl.className = 'detail-header-small';
+        }
+        
+        window.closeUserDropdown = function() {
+            var menu = document.getElementById('userDropdownMenu');
+            if (menu) menu.classList.remove('show');
+            var trigger = document.getElementById('userDropdownTrigger');
+            if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        };
+        document.addEventListener('DOMContentLoaded', function() {
+            var trigger = document.getElementById('userDropdownTrigger');
+            var menu = document.getElementById('userDropdownMenu');
+            if (trigger && menu) {
+                trigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    var open = menu.classList.toggle('show');
+                    trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+                });
+                menu.addEventListener('click', function(e) { e.stopPropagation(); });
             }
+            document.addEventListener('click', function() {
+                closeUserDropdown();
+            });
         });
         
         // 사용자 정보 로드
@@ -1876,15 +2088,14 @@
             }
             
             if (isAdmin) {
-                document.getElementById('approveBtn').style.display = 'block';
+                var adminBtn = document.getElementById('userManagementDropdownBtn');
+                if (adminBtn) adminBtn.style.display = 'block';
             }
             
-            // 탭별 글 목록 로드
-            loadTabPosts('praise');
+            loadAuthorIcons().then(function() { loadTabPosts('praise'); });
             
-            // 플로팅 버튼 표시
             const floatingBtn = document.getElementById('floatingAddBtn');
-            floatingBtn.style.display = 'flex';
+            if (floatingBtn) floatingBtn.style.display = 'flex';
         }
         
         // 탭 전환
@@ -1921,8 +2132,8 @@
             }
         };
         
-        // 달력 관련 변수
-        let currentCalendarDate = new Date(2026, 1, 7); // 2026년 2월 7일 (D+1 기준일)
+        // 달력 관련 변수 (열면 오늘 날짜가 있는 달부터 표시)
+        let currentCalendarDate = new Date();
         const dDayBase = new Date(2026, 1, 7); // 2026년 2월 7일 = D+1
         
         // YYYY-MM-DD 문자열을 로컬 날짜로 파싱 (UTC 파싱 시 타임존 때문에 하루 밀리는 문제 방지)
@@ -2444,6 +2655,34 @@
                     return;
                 }
                 
+                if (tabName === 'praise' || tabName === 'complaint' || tabName === 'memo') {
+                    var tabIcons = { praise: '💕', complaint: '📢', memo: '📝' };
+                    postsContainer.className = 'post-grid';
+                    postsArray.forEach(([postId, post]) => {
+                        var item = document.createElement('div');
+                        item.className = 'post-grid-item';
+                        item.dataset.postId = postId;
+                        item.dataset.tab = tabName;
+                        var raw = (post.content || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+                        if (raw.length >= 80) raw += '…';
+                        var preview = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') || '(내용 없음)';
+                        var date = new Date(post.createdAt);
+                        var dateStr = date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                        var iconHtml = '';
+                        if (window.authorIconMap && window.authorIconMap[post.author]) {
+                            iconHtml = '<img class="post-grid-icon-img" src="' + window.authorIconMap[post.author] + '" alt="">';
+                        } else {
+                            iconHtml = '<span class="post-grid-icon">' + (tabIcons[tabName] || '📝') + '</span>';
+                        }
+                        item.innerHTML = iconHtml +
+                            '<span class="post-grid-preview">' + preview + '</span>' +
+                            '<span class="post-grid-meta">' + (post.author || '') + ' · ' + dateStr + '</span>';
+                        item.addEventListener('click', function() { openPostDetailModal(postId, post, tabName); });
+                        postsContainer.appendChild(item);
+                    });
+                    return;
+                }
+                
                 postsContainer.className = 'posts-container';
                 postsArray.forEach(([postId, post]) => {
                     const postElement = createPostElement(postId, post, tabName);
@@ -2490,11 +2729,13 @@
             }
             
             var date = new Date(post.createdAt);
-            var dateStr = date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-            titleEl.textContent = post.author + ' · ' + dateStr;
+            var dateStr = formatDetailDate(date);
+            setDetailHeader(titleEl, post.author, dateStr);
             contentEl.textContent = post.content || '';
             contentEl.style.display = post.content ? 'block' : 'none';
             mediaEl.innerHTML = '';
+            mediaEl.style.display = '';
+            document.getElementById('dailyDetailCommentsWrap').style.display = 'none';
             
             if (post.media && post.media.length > 0) {
                 if (post.media.length > 1) {
@@ -2584,6 +2825,50 @@
         
         window.closeDailyDetailModal = function() {
             document.getElementById('dailyDetailModal').classList.remove('show');
+        };
+        
+        window.openPostDetailModal = function(postId, post, tabName) {
+            var modal = document.getElementById('dailyDetailModal');
+            var titleEl = document.getElementById('dailyDetailTitle');
+            var contentEl = document.getElementById('dailyDetailContent');
+            var mediaEl = document.getElementById('dailyDetailMedia');
+            var commentsWrap = document.getElementById('dailyDetailCommentsWrap');
+            var commentsContainer = document.getElementById('dailyDetailCommentsContainer');
+            var actionsEl = document.getElementById('dailyDetailActions');
+            var editBtn = document.getElementById('dailyDetailEditBtn');
+            var deleteBtn = document.getElementById('dailyDetailDeleteBtn');
+            
+            modal.dataset.detailPostId = postId;
+            modal.dataset.detailTab = tabName;
+            
+            var currentUserName = localStorage.getItem('bamboo_userName');
+            var isAdmin = localStorage.getItem('bamboo_isAdmin') === 'true';
+            var isOwner = post.author === currentUserName;
+            if (isOwner || isAdmin) {
+                actionsEl.style.display = 'flex';
+                editBtn.onclick = function() { closeDailyDetailModal(); editPost(postId, tabName); };
+                deleteBtn.onclick = function() { closeDailyDetailModal(); deletePost(postId, tabName); };
+                editBtn.style.display = isOwner || !isAdmin ? 'inline-block' : 'none';
+                deleteBtn.style.display = 'inline-block';
+            } else {
+                actionsEl.style.display = 'none';
+            }
+            
+            var date = new Date(post.createdAt);
+            var dateStr = formatDetailDate(date);
+            setDetailHeader(titleEl, post.author, dateStr);
+            contentEl.textContent = post.content || '';
+            contentEl.style.display = 'block';
+            mediaEl.innerHTML = '';
+            mediaEl.style.display = 'none';
+            commentsWrap.style.display = 'block';
+            commentsContainer.innerHTML = '<div id="comments-' + tabName + '-' + postId + '"></div>' +
+                '<div class="comment-form">' +
+                '<input type="text" class="comment-input" id="comment-input-' + tabName + '-' + postId + '" placeholder="댓글을 입력하세요..." data-post-id="' + postId + '" data-tab="' + tabName + '">' +
+                '<button type="button" class="comment-submit-inline comment-submit-btn" data-post-id="' + postId + '" data-tab="' + tabName + '" title="댓글 작성"></button>' +
+                '</div>';
+            loadComments(postId, tabName);
+            modal.classList.add('show');
         };
         
         // 줄바꿈·띄어쓰기 보존 (모바일 포함) — HTML 이스케이프 후 \n을 <br>로
@@ -3881,6 +4166,20 @@ const img = new Image();
                 document.getElementById('editUserName').value = user.name || '';
                 document.getElementById('editUserBirthdate').value = user.birthdate || '';
                 document.getElementById('editUserPhone').value = user.phone || '';
+                document.getElementById('editUserIconInput').value = '';
+                var previewEl = document.getElementById('editUserIconPreview');
+                previewEl.innerHTML = '';
+                if (user.icon) {
+                    var img = document.createElement('img');
+                    img.src = user.icon;
+                    img.style.width = '32px';
+                    img.style.height = '32px';
+                    img.style.objectFit = 'contain';
+                    previewEl.appendChild(img);
+                    previewEl.appendChild(document.createTextNode(' 현재 아이콘'));
+                } else {
+                    previewEl.textContent = '등록된 아이콘 없음';
+                }
                 
                 const editModal = document.getElementById('editUserModal');
                 editModal.classList.add('show');
@@ -3897,6 +4196,7 @@ const img = new Image();
             const name = document.getElementById('editUserName').value.trim();
             const birthdate = document.getElementById('editUserBirthdate').value;
             const phone = document.getElementById('editUserPhone').value.trim();
+            const iconInput = document.getElementById('editUserIconInput');
             
             if (!name) {
                 alert('이름을 입력해주세요.');
@@ -3918,7 +4218,6 @@ const img = new Image();
                     }
                 }
                 
-                // 사용자 정보 업데이트
                 const userRef = ref(database, `users/${userId}`);
                 const currentUser = (await get(userRef)).val();
                 
@@ -3928,12 +4227,24 @@ const img = new Image();
                     phone: phone || currentUser.phone || ''
                 };
                 
+                if (iconInput.files && iconInput.files.length > 0) {
+                    const file = iconInput.files[0];
+                    const ext = (file.name.split('.').pop() || 'ico').toLowerCase();
+                    const path = `icons/${userId}/icon.${ext}`;
+                    const storageRefPath = storageRef(storage, path);
+                    await uploadBytes(storageRefPath, file);
+                    const downloadURL = await getDownloadURL(storageRefPath);
+                    updates.icon = downloadURL;
+                } else if (currentUser && currentUser.icon) {
+                    updates.icon = currentUser.icon;
+                }
+                
                 await update(userRef, updates);
+                await loadAuthorIcons();
                 
                 alert('사용자 정보가 수정되었습니다.');
                 closeEditUserModal();
                 
-                // 현재 표시 중인 목록 새로고침
                 const pendingUsersDiv = document.getElementById('pendingUsers');
                 if (pendingUsersDiv.innerHTML.includes('대기 중인')) {
                     showPendingUsers();
