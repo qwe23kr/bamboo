@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#ff69b4">
+    <meta name="theme-color" content="#1a1a1a">
     <meta name="description" content="밤부 - 대나무숲 커뮤니티">
     <title>밤부 - 메인</title>
     <link rel="manifest" href="manifest.json">
@@ -27,7 +27,7 @@
         
         body {
             font-family: 'Yanolja', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #ffb6c1 0%, #ffc0cb 50%, #ffd1dc 100%);
+            background: #f5f5f5;
             min-height: 100vh;
             padding: 10px;
             position: relative;
@@ -37,20 +37,24 @@
         
         /* 배경 장식 */
         body::before {
-            content: '✨';
+            content: '';
             position: fixed;
-            font-size: 2em;
-            color: rgba(255, 255, 255, 0.3);
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.02);
             top: 10%;
             left: 10%;
             animation: float 3s ease-in-out infinite;
         }
         
         body::after {
-            content: '💖';
+            content: '';
             position: fixed;
-            font-size: 1.5em;
-            color: rgba(255, 255, 255, 0.3);
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.02);
             top: 20%;
             right: 15%;
             animation: float 4s ease-in-out infinite;
@@ -93,11 +97,11 @@
         }
         
         .header {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
+            background: #fff;
+            border-radius: 12px;
             padding: 18px 25px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(255, 182, 193, 0.3);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -106,14 +110,12 @@
         }
         
         .logo {
-            font-family: 'Yanolja', sans-serif;
-            font-size: 2.2em;
-            color: #ff69b4;
-            font-weight: normal;
-            word-break: keep-all;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
+            height: 48px;
+            width: auto;
+            max-width: 100%;
+            object-fit: contain;
             flex-shrink: 0;
+            display: block;
         }  
         
         .user-info {
@@ -125,13 +127,13 @@
         }
         
         .user-name {
-            color: #ff69b4;
+            color: #333;
             font-weight: 500;
             font-size: 0.95em;
         }
         
         .dday-header {
-            color: #ff1493;
+            color: #666;
             font-weight: 600;
             font-size: 0.9em;
             margin-right: 8px;
@@ -140,7 +142,7 @@
         .btn-profile-link {
             background: transparent;
             border: none;
-            color: #ff69b4;
+            color: #333;
             font-size: 0.85em;
             cursor: pointer;
             padding: 4px 8px;
@@ -150,7 +152,7 @@
             -webkit-tap-highlight-color: transparent;
         }
         .btn-profile-link:hover {
-            color: #ff1493;
+            color: #000;
         }
         
         .user-dropdown {
@@ -159,7 +161,7 @@
         .user-dropdown-trigger {
             background: transparent;
             border: none;
-            color: #ff69b4;
+            color: #1a1a1a;
             font-weight: 500;
             font-size: 0.95em;
             cursor: pointer;
@@ -171,7 +173,7 @@
             -webkit-tap-highlight-color: transparent;
         }
         .user-dropdown-trigger:hover {
-            color: #ff1493;
+            color: #333;
         }
         .user-dropdown-trigger::after {
             content: '▼';
@@ -186,8 +188,8 @@
             min-width: 140px;
             background: #fff;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(255, 105, 180, 0.25);
-            border: 1px solid #ffd9e6;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e8e8e8;
             padding: 6px 0;
             z-index: 1000;
             display: none;
@@ -211,8 +213,8 @@
         }
         .user-dropdown-menu button:hover,
         .user-dropdown-menu a:hover {
-            background: #fff0f5;
-            color: #ff69b4;
+            background: #f5f5f5;
+            color: #1a1a1a;
         }
         
         .btn {
@@ -229,14 +231,15 @@
         }
         
         .btn-pink {
-            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
-            color: white;
-            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+            background: #1a1a1a;
+            color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
         }
         
         .btn-pink:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.4);
+            background: #333;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
         
         .event-form-actions {
@@ -281,11 +284,11 @@
         
         /* 탭 메뉴 */
         .tabs-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
+            background: #fff;
+            border-radius: 12px;
             padding: 10px;
             margin-bottom: 20px;
-            box-shadow: 0 5px 20px rgba(255, 182, 193, 0.5);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
         
         .tabs {
@@ -310,14 +313,14 @@
         }
         
         .tab-btn.active {
-            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            background: #1a1a1a;
             color: white;
-            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
         }
         
         .tab-btn:hover:not(.active) {
             background: #f5f5f5;
-            color: #ff69b4;
+            color: #1a1a1a;
         }
         
         .tab-content {
@@ -336,19 +339,19 @@
         .upload-btn {
             display: inline-block;
             padding: 15px 25px;
-            background: linear-gradient(135deg, #ffc0cb 0%, #ffb6c1 100%);
-            color: #ff69b4;
+            background: linear-gradient(135deg, #e0e0e0 0%, #ddd 100%);
+            color: #1a1a1a;
             border-radius: 15px;
             cursor: pointer;
             text-align: center;
             transition: all 0.3s;
             font-family: 'Yanolja', sans-serif;
             font-weight: normal;
-            border: 2px dashed #ff69b4;
+            border: 2px dashed #1a1a1a;
         }
         
         .upload-btn:hover {
-            background: linear-gradient(135deg, #ffb6c1 0%, #ffc0cb 100%);
+            background: linear-gradient(135deg, #ddd 0%, #e0e0e0 100%);
             transform: translateY(-2px);
         }
         
@@ -571,17 +574,17 @@
         }
         
         .write-section {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
+            background: #fff;
+            border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 5px 20px rgba(255, 182, 193, 0.5);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
         
         .write-title {
             font-family: 'Yanolja', sans-serif;
             font-size: 1.6em;
-            color: #ff69b4;
+            color: #1a1a1a;
             margin-bottom: 15px;
             font-weight: normal;
         }
@@ -595,7 +598,7 @@
         textarea {
             width: 100%;
             padding: 15px;
-            border: 2px solid #ffc0cb;
+            border: 2px solid #e0e0e0;
             border-radius: 15px;
             font-size: 16px; /* 모바일에서 자동 줌 방지 */
             font-family: 'Yanolja', sans-serif;
@@ -608,8 +611,8 @@
         
         textarea:focus {
             outline: none;
-            border-color: #ff69b4;
-            box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+            border-color: #1a1a1a;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.12);
         }
         
         #eventTitle {
@@ -628,10 +631,10 @@
         }
         
         .post {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
+            background: #fff;
+            border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 5px 20px rgba(255, 182, 193, 0.5);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
             animation: slideIn 0.5s ease-out;
             word-wrap: break-word;
             overflow-wrap: break-word;
@@ -654,7 +657,7 @@
             align-items: center;
             margin-bottom: 15px;
             padding-bottom: 15px;
-            border-bottom: 2px solid #ffc0cb;
+            border-bottom: 2px solid #e0e0e0;
             position: relative;
         }
         
@@ -684,8 +687,8 @@
         
         .edit-btn {
             background: transparent;
-            border: 1px solid #ff69b4;
-            color: #ff69b4;
+            border: 1px solid #1a1a1a;
+            color: #1a1a1a;
             padding: 5px 12px;
             border-radius: 15px;
             font-size: 0.85em;
@@ -696,13 +699,13 @@
         }
         
         .edit-btn:hover {
-            background: #ff69b4;
+            background: #1a1a1a;
             color: white;
         }
         
         .post-author {
             font-weight: 600;
-            color: #ff69b4;
+            color: #1a1a1a;
             font-size: 1.05em;
         }
         
@@ -725,7 +728,7 @@
         .comments-section {
             margin-top: 20px;
             padding-top: 20px;
-            border-top: 1px solid #ffc0cb;
+            border-top: 1px solid #e0e0e0;
         }
         
         .comment-form {
@@ -736,7 +739,7 @@
         .comment-input {
             width: 100%;
             padding: 12px 50px 12px 15px;
-            border: 2px solid #ffc0cb;
+            border: 2px solid #e0e0e0;
             border-radius: 20px;
             font-family: 'Yanolja', sans-serif;
             font-size: 16px; /* 모바일에서 자동 줌 방지 */
@@ -748,7 +751,7 @@
         
         .comment-input:focus {
             outline: none;
-            border-color: #ff69b4;
+            border-color: #1a1a1a;
         }
         
         .comment-submit-inline {
@@ -756,7 +759,7 @@
             right: 8px;
             top: 50%;
             transform: translateY(-50%);
-            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            background: #1a1a1a;
             border: none;
             font-size: 1.5em;
             cursor: pointer;
@@ -770,7 +773,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            box-shadow: 0 2px 5px rgba(255, 105, 180, 0.3);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
         }
         
         .comment-submit-inline::before {
@@ -798,8 +801,8 @@
         }
         
         .comment-submit-inline:hover {
-            background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);
-            box-shadow: 0 3px 8px rgba(255, 105, 180, 0.4);
+            background: #333;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
             transform: translateY(-50%) scale(1.05);
         }
         
@@ -825,11 +828,11 @@
         }
         
         .comment {
-            background: #fff5f5;
+            background: #f8f8f8;
             padding: 12px 15px;
             border-radius: 15px;
             margin-bottom: 10px;
-            border-left: 3px solid #ff69b4;
+            border-left: 3px solid #1a1a1a;
         }
         
         .comment-header {
@@ -841,7 +844,7 @@
         
         .comment-author {
             font-weight: 600;
-            color: #ff69b4;
+            color: #1a1a1a;
             font-size: 0.95em;
         }
         
@@ -895,86 +898,90 @@
         
         .loading {
             text-align: center;
-            color: #ff69b4;
+            color: #1a1a1a;
             padding: 50px;
             font-size: 1.1em;
             font-weight: 400;
         }
         
-        /* 일상로그 사진첩 */
+        /* 일상로그 사진첩 (인스타 스타일: 공백·라운드 없음) */
         .daily-photo-album {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            padding: 10px;
+            gap: 0;
+            padding: 0;
         }
         .daily-photo-item {
             aspect-ratio: 1;
-            border-radius: 12px;
+            border-radius: 0;
             overflow: hidden;
-            background: #f8f0f2;
+            background: #eee;
             cursor: pointer;
             position: relative;
             -webkit-tap-highlight-color: transparent;
+            border-right: 1px solid #e8e8e8;
+            border-bottom: 1px solid #e8e8e8;
+        }
+        .daily-photo-item:nth-child(3n) {
+            border-right: none;
         }
         .daily-photo-item img,
         .daily-photo-item .daily-photo-placeholder {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover;
             display: block;
         }
         .daily-photo-placeholder {
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #ff69b4;
+            color: #1a1a1a;
             font-size: 2em;
         }
         .daily-photo-item video {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover;
         }
         
-        /* 칭찬하기/민원제기/메모장 바둑판 그리드 */
+        /* 칭찬하기/민원제기/메모장 바둑판 (인스타 스타일: 공백·라운드 없음) */
         .post-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            padding: 10px;
-        }
-        @media (min-width: 768px) {
-            .post-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            padding: 0;
         }
         .post-grid-item {
             aspect-ratio: 1;
-            border-radius: 12px;
+            border-radius: 0;
             background: #fff;
-            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.15);
-            border: 1px solid #ffd9e6;
+            box-shadow: none;
+            border: none;
+            border-right: 1px solid #eee;
+            border-bottom: 1px solid #eee;
             cursor: pointer;
-            padding: 12px;
+            padding: 8px;
             display: flex;
             flex-direction: column;
             -webkit-tap-highlight-color: transparent;
             overflow: hidden;
         }
+        .post-grid-item:nth-child(3n) {
+            border-right: none;
+        }
         .post-grid-item:hover {
-            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.25);
+            background: #fafafa;
         }
         .post-grid-item .post-grid-icon {
-            font-size: 1.8em;
-            margin-bottom: 6px;
+            font-size: 1.1em;
             flex-shrink: 0;
         }
         .post-grid-item .post-grid-icon-img {
-            width: 36px;
-            height: 36px;
+            width: 22px;
+            height: 22px;
             object-fit: contain;
-            margin-bottom: 6px;
+            border-radius: 50%;
             flex-shrink: 0;
         }
         .post-grid-item .post-grid-preview {
@@ -993,6 +1000,14 @@
             color: #999;
             margin-top: 6px;
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .post-grid-item .post-grid-meta-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
         /* 일상로그 상세 모달 */
@@ -1034,18 +1049,6 @@
             height: auto;
             display: block;
         }
-        .daily-detail-media-item .longpress-hint {
-            position: absolute;
-            bottom: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.6);
-            color: #fff;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            pointer-events: none;
-        }
         .daily-detail-actions {
             display: flex;
             gap: 8px;
@@ -1076,7 +1079,7 @@
             background: white;
             border-radius: 20px;
             padding: 15px;
-            box-shadow: 0 2px 10px rgba(255, 182, 193, 0.3);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
             width: 100%;
             box-sizing: border-box;
             overflow: hidden;
@@ -1092,13 +1095,13 @@
         .calendar-title {
             font-family: 'Yanolja', sans-serif;
             font-size: 1.5em;
-            color: #ff69b4;
+            color: #1a1a1a;
             font-weight: normal;
             margin: 0;
         }
         
         .calendar-nav-btn {
-            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            background: #1a1a1a;
             color: white;
             border: none;
             border-radius: 50%;
@@ -1113,7 +1116,7 @@
         
         .calendar-nav-btn:hover {
             transform: scale(1.1);
-            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.4);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
         
         .calendar-grid {
@@ -1129,7 +1132,7 @@
         .calendar-day-header {
             text-align: center;
             font-weight: 600;
-            color: #ff69b4;
+            color: #1a1a1a;
             padding: 6px;
             font-family: 'Yanolja', sans-serif;
             font-size: 0.85em;
@@ -1138,8 +1141,8 @@
         .calendar-day {
             aspect-ratio: 1;
             min-width: 0;
-            background: #fff5f5;
-            border: 1.5px solid #ffc0cb;
+            background: #f8f8f8;
+            border: 1.5px solid #e0e0e0;
             border-radius: 8px;
             display: flex;
             flex-direction: column;
@@ -1178,9 +1181,9 @@
         }
         
         .calendar-day:hover {
-            background: #ffe4e9;
+            background: #f0f0f0;
             transform: translateY(-2px);
-            box-shadow: 0 2px 5px rgba(255, 105, 180, 0.3);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
         }
         
         .calendar-day.other-month {
@@ -1188,8 +1191,8 @@
         }
         
         .calendar-day.today {
-            background: linear-gradient(135deg, #ffc0cb 0%, #ffb6c1 100%);
-            border-color: #ff69b4;
+            background: linear-gradient(135deg, #e0e0e0 0%, #ddd 100%);
+            border-color: #1a1a1a;
             font-weight: 600;
         }
         
@@ -1213,13 +1216,13 @@
         }
         
         .calendar-event.birthday {
-            background: #ff69b4;
+            background: #1a1a1a;
             color: white;
         }
         
         .calendar-event.dday {
-            background: #ffc0cb;
-            color: #ff1493;
+            background: #e0e0e0;
+            color: #333;
         }
         
         .calendar-legend {
@@ -1227,7 +1230,7 @@
             justify-content: center;
             gap: 15px;
             padding-top: 10px;
-            border-top: 1px solid #ffc0cb;
+            border-top: 1px solid #e0e0e0;
         }
         
         .legend-item {
@@ -1248,20 +1251,20 @@
         .calendar-events-list {
             margin-top: 20px;
             padding-top: 20px;
-            border-top: 1px solid #ffc0cb;
+            border-top: 1px solid #e0e0e0;
         }
         
         .events-list-title {
             font-family: 'Yanolja', sans-serif;
             font-size: 1.3em;
-            color: #ff69b4;
+            color: #1a1a1a;
             margin-bottom: 15px;
             font-weight: normal;
         }
         
         .event-item {
-            background: #fff5f5;
-            border: 1px solid #ffc0cb;
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
             border-radius: 10px;
             padding: 12px;
             margin-bottom: 10px;
@@ -1276,7 +1279,7 @@
         }
         
         .event-date {
-            color: #ff69b4;
+            color: #1a1a1a;
             font-weight: 600;
             font-size: 0.9em;
         }
@@ -1370,7 +1373,7 @@
         .modal-title {
             font-family: 'Yanolja', sans-serif;
             font-size: 1.8em;
-            color: #ff69b4;
+            color: #1a1a1a;
             margin-bottom: 20px;
             font-weight: normal;
         }
@@ -1392,7 +1395,7 @@
         }
         
         .close-btn:hover {
-            color: #ff69b4;
+            color: #1a1a1a;
             transform: rotate(90deg);
         }
         
@@ -1411,13 +1414,13 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            background: #1a1a1a;
             color: white;
             border: none;
             font-size: 2em;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 20px rgba(255, 105, 180, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
             transition: all 0.3s;
             z-index: 100;
             display: flex;
@@ -1429,7 +1432,7 @@
         
         .floating-add-btn:hover {
             transform: scale(1.1) rotate(90deg);
-            box-shadow: 0 6px 25px rgba(255, 105, 180, 0.7);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.22);
         }
         
         .floating-add-btn:active {
@@ -1439,7 +1442,7 @@
         /* 플로팅 버튼은 JavaScript로 제어 */
         
         .pending-user {
-            background: #fff5f5;
+            background: #f8f8f8;
             padding: 15px;
             border-radius: 15px;
             margin-bottom: 10px;
@@ -1471,7 +1474,7 @@
         }
         .event-d-btn {
             padding: 6px 12px;
-            border: 2px solid #ffc0cb;
+            border: 2px solid #e0e0e0;
             border-radius: 10px;
             background: #fff;
             font-size: 14px;
@@ -1480,8 +1483,8 @@
             transition: all 0.2s;
         }
         .event-d-btn:hover {
-            border-color: #ff69b4;
-            background: #fff5f8;
+            border-color: #1a1a1a;
+            background: #f5f5f5;
         }
 
         .form-group label {
@@ -1494,7 +1497,7 @@
         .form-group input {
             width: 100%;
             padding: 10px;
-            border: 2px solid #ffc0cb;
+            border: 2px solid #e0e0e0;
             border-radius: 10px;
             font-size: 1em;
             font-family: 'Yanolja', sans-serif;
@@ -1502,7 +1505,7 @@
         
         .form-group input:focus {
             outline: none;
-            border-color: #ff69b4;
+            border-color: #1a1a1a;
         }
         
         
@@ -1529,7 +1532,7 @@
         }
         
         .user-details strong {
-            color: #ff69b4;
+            color: #1a1a1a;
         }
         
         /* 모바일 최적화 */
@@ -1546,8 +1549,7 @@
             }
             
             .logo {
-                font-size: 1.5em;
-                line-height: 1.2;
+                height: 36px;
             }
             
             .user-info {
@@ -1711,7 +1713,7 @@
         
         @media (max-width: 480px) {
             .logo {
-                font-size: 1.3em;
+                height: 32px;
             }
             
             .header {
@@ -1744,7 +1746,7 @@
 </head>
 <body>
     <div class="header">
-        <div class="logo">두근두근 대나무숲 ✨</div>
+        <img class="logo" src="logo2.png" alt="두근두근 대나무숲" />
         <div class="user-info">
             <span class="dday-header" id="dDayHeader"></span>
             <div class="user-dropdown">
@@ -1857,7 +1859,7 @@
     <!-- 플로팅 + 버튼 -->
     <button id="floatingAddBtn" class="floating-add-btn" onclick="openWriteModal()">+</button>
     
-    <!-- 일상로그 상세 모달 (사진+내용 보기, 사진 꾹 누르면 다운로드) -->
+    <!-- 일상로그 상세 모달 (사진+내용 보기) -->
     <div id="dailyDetailModal" class="modal daily-detail-modal" data-detail-post-id="" data-detail-tab="daily">
         <div class="modal-content">
             <div class="modal-header">
@@ -2668,15 +2670,15 @@
                         var preview = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') || '(내용 없음)';
                         var date = new Date(post.createdAt);
                         var dateStr = date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                        var iconHtml = '';
+                        var metaContent = '';
                         if (window.authorIconMap && window.authorIconMap[post.author]) {
-                            iconHtml = '<img class="post-grid-icon-img" src="' + window.authorIconMap[post.author] + '" alt="" loading="lazy" decoding="async">';
+                            metaContent = '<img class="post-grid-icon-img" src="' + window.authorIconMap[post.author] + '" alt="" loading="lazy" decoding="async">';
                         } else {
-                            iconHtml = '<span class="post-grid-icon">' + (tabIcons[tabName] || '📝') + '</span>';
+                            metaContent = '<span class="post-grid-icon">' + (tabIcons[tabName] || '📝') + '</span>';
                         }
-                        item.innerHTML = iconHtml +
-                            '<span class="post-grid-preview">' + preview + '</span>' +
-                            '<span class="post-grid-meta">' + (post.author || '') + ' · ' + dateStr + '</span>';
+                        metaContent += '<span class="post-grid-meta-text">' + (post.author || '') + ' · ' + dateStr + '</span>';
+                        item.innerHTML = '<span class="post-grid-preview">' + preview + '</span>' +
+                            '<span class="post-grid-meta">' + metaContent + '</span>';
                         item.addEventListener('click', function() { openPostDetailModal(postId, post, tabName); });
                         postsContainer.appendChild(item);
                     });
@@ -2793,10 +2795,6 @@
                         img.loading = 'lazy';
                         img.decoding = 'async';
                         wrap.appendChild(img);
-                        var hint = document.createElement('span');
-                        hint.className = 'longpress-hint';
-                        hint.textContent = '사진을 꾹 누르면 다운로드';
-                        wrap.appendChild(hint);
                         setupLongPressDownload(img, m.url, 'image-1.jpg');
                     }
                     mediaEl.appendChild(wrap);
@@ -4085,7 +4083,7 @@ const img = new Image();
                             </div>
                             <div style="display: flex; gap: 5px; flex-direction: column;">
                                 <button class="btn btn-pink" onclick="approveUser('${userId}')">승인</button>
-                                <button class="btn" onclick="editUser('${userId}')" style="background: #ffb6c1;">수정</button>
+                                <button class="btn" onclick="editUser('${userId}')" style="background: #ddd;">수정</button>
                                 <button class="btn" onclick="deleteUser('${userId}')" style="background: #ff6b6b; color: white;">삭제</button>
                             </div>
                         `;
@@ -4135,7 +4133,7 @@ const img = new Image();
                         </div>
                         <div style="display: flex; gap: 5px; flex-direction: column;">
                             ${!user.approved ? `<button class="btn btn-pink" onclick="approveUser('${userId}')">승인</button>` : ''}
-                            <button class="btn" onclick="editUser('${userId}')" style="background: #ffb6c1;">수정</button>
+                            <button class="btn" onclick="editUser('${userId}')" style="background: #ddd;">수정</button>
                             <button class="btn" onclick="deleteUser('${userId}')" style="background: #ff6b6b; color: white;">삭제</button>
                         </div>
                     `;
