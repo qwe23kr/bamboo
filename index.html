@@ -2735,7 +2735,16 @@
             contentEl.style.display = post.content ? 'block' : 'none';
             mediaEl.innerHTML = '';
             mediaEl.style.display = '';
-            document.getElementById('dailyDetailCommentsWrap').style.display = 'none';
+            
+            var commentsWrap = document.getElementById('dailyDetailCommentsWrap');
+            var commentsContainer = document.getElementById('dailyDetailCommentsContainer');
+            commentsWrap.style.display = 'block';
+            commentsContainer.innerHTML = '<div id="comments-' + tabName + '-' + postId + '"></div>' +
+                '<div class="comment-form">' +
+                '<input type="text" class="comment-input" id="comment-input-' + tabName + '-' + postId + '" placeholder="댓글을 입력하세요..." data-post-id="' + postId + '" data-tab="' + tabName + '">' +
+                '<button type="button" class="comment-submit-inline comment-submit-btn" data-post-id="' + postId + '" data-tab="' + tabName + '" title="댓글 작성"></button>' +
+                '</div>';
+            loadComments(postId, tabName);
             
             if (post.media && post.media.length > 0) {
                 if (post.media.length > 1) {
