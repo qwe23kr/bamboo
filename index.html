@@ -671,13 +671,17 @@
             background: transparent;
             border: 1px solid #ff6b6b;
             color: #ff6b6b;
-            padding: 5px 12px;
+            padding: 8px 14px;
+            min-height: 44px;
             border-radius: 15px;
             font-size: 0.85em;
             cursor: pointer;
             transition: all 0.2s;
             font-family: 'Yanolja', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            position: relative;
+            z-index: 10;
         }
         
         .delete-btn:hover {
@@ -689,13 +693,17 @@
             background: transparent;
             border: 1px solid #1a1a1a;
             color: #1a1a1a;
-            padding: 5px 12px;
+            padding: 8px 14px;
+            min-height: 44px;
             border-radius: 15px;
             font-size: 0.85em;
             cursor: pointer;
             transition: all 0.2s;
             font-family: 'Yanolja', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            position: relative;
+            z-index: 10;
         }
         
         .edit-btn:hover {
@@ -744,6 +752,7 @@
             font-family: 'Yanolja', sans-serif;
             font-size: 16px; /* 모바일에서 자동 줌 방지 */
             min-height: 44px;
+            resize: none;
             -webkit-appearance: none;
             font-weight: 400;
             box-sizing: border-box;
@@ -1054,6 +1063,8 @@
             gap: 8px;
             margin-bottom: 12px;
             flex-wrap: wrap;
+            position: relative;
+            z-index: 2;
         }
         .detail-header-small {
             display: flex;
@@ -1387,11 +1398,17 @@
             transition: all 0.3s;
             line-height: 1;
             padding: 0;
-            width: 30px;
-            height: 30px;
+            min-width: 44px;
+            min-height: 44px;
+            width: 44px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            z-index: 10;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .close-btn:hover {
@@ -1404,6 +1421,9 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+            flex-shrink: 0;
         }
         
         /* 플로팅 + 버튼 */
@@ -2743,7 +2763,7 @@
             commentsWrap.style.display = 'block';
             commentsContainer.innerHTML = '<div id="comments-' + tabName + '-' + postId + '"></div>' +
                 '<div class="comment-form">' +
-                '<input type="text" class="comment-input" id="comment-input-' + tabName + '-' + postId + '" placeholder="댓글을 입력하세요..." data-post-id="' + postId + '" data-tab="' + tabName + '">' +
+                '<textarea class="comment-input" id="comment-input-' + tabName + '-' + postId + '" placeholder="댓글을 입력하세요..." rows="2" data-post-id="' + postId + '" data-tab="' + tabName + '"></textarea>' +
                 '<button type="button" class="comment-submit-inline comment-submit-btn" data-post-id="' + postId + '" data-tab="' + tabName + '" title="댓글 작성"></button>' +
                 '</div>';
             loadComments(postId, tabName);
@@ -2873,7 +2893,7 @@
             commentsWrap.style.display = 'block';
             commentsContainer.innerHTML = '<div id="comments-' + tabName + '-' + postId + '"></div>' +
                 '<div class="comment-form">' +
-                '<input type="text" class="comment-input" id="comment-input-' + tabName + '-' + postId + '" placeholder="댓글을 입력하세요..." data-post-id="' + postId + '" data-tab="' + tabName + '">' +
+                '<textarea class="comment-input" id="comment-input-' + tabName + '-' + postId + '" placeholder="댓글을 입력하세요..." rows="2" data-post-id="' + postId + '" data-tab="' + tabName + '"></textarea>' +
                 '<button type="button" class="comment-submit-inline comment-submit-btn" data-post-id="' + postId + '" data-tab="' + tabName + '" title="댓글 작성"></button>' +
                 '</div>';
             loadComments(postId, tabName);
@@ -2982,7 +3002,7 @@
                 <div class="comments-section">
                     <div id="comments-${tabName}-${postId}"></div>
                     <div class="comment-form">
-                        <input type="text" class="comment-input" id="comment-input-${tabName}-${postId}" placeholder="댓글을 입력하세요..." data-post-id="${postId}" data-tab="${tabName}">
+                        <textarea class="comment-input" id="comment-input-${tabName}-${postId}" placeholder="댓글을 입력하세요..." rows="2" data-post-id="${postId}" data-tab="${tabName}"></textarea>
                         <button type="button" class="comment-submit-inline comment-submit-btn" data-post-id="${postId}" data-tab="${tabName}" title="댓글 작성"></button>
                     </div>
                 </div>
@@ -4369,15 +4389,18 @@ const img = new Image();
             }
         });
         
-        // 엔터키로 댓글 작성
-        document.addEventListener('keypress', async (e) => {
+        // 엔터키로 댓글 작성 (Shift+Enter 전송, Enter만 누르면 줄바꿈)
+        document.addEventListener('keydown', async (e) => {
             if (e.target.classList.contains('comment-input') && e.key === 'Enter') {
-                e.preventDefault();
-                const postId = e.target.dataset.postId;
-                const tabName = e.target.dataset.tab;
-                if (postId && tabName) {
-                    await addComment(postId, tabName, e.target);
+                if (e.shiftKey) {
+                    e.preventDefault();
+                    const postId = e.target.dataset.postId;
+                    const tabName = e.target.dataset.tab;
+                    if (postId && tabName) {
+                        await addComment(postId, tabName, e.target);
+                    }
                 }
+                // Shift 없이 Enter면 기본 동작(줄바꿈) 유지
             }
         });
         
