@@ -4389,19 +4389,37 @@ const img = new Image();
             }
         });
         
-        // 엔터키로 댓글 작성 (Shift+Enter 전송, Enter만 누르면 줄바꿈)
+        // 엔터키: 데스크톱=Enter 줄바꿈 / Shift+Enter 전송, 모바일=Enter 전송 (키보드 완료/전송 키)
         document.addEventListener('keydown', async (e) => {
-            if (e.target.classList.contains('comment-input') && e.key === 'Enter') {
-                if (e.shiftKey) {
-                    e.preventDefault();
-                    const postId = e.target.dataset.postId;
-                    const tabName = e.target.dataset.tab;
-                    if (postId && tabName) {
-                        await addComment(postId, tabName, e.target);
-                    }
+            if (!e.target.classList.contains('comment-input') || e.key !== 'Enter') return;
+            const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            if (isMobile) {
+                // 모바일: Enter 한 번에 전송 (소프트키보드 완료/전송 키)
+                e.preventDefault();
+                const postId = e.target.dataset.postId;
+                const tabName = e.target.dataset.tab;
+                if (postId && tabName) {
+                    await addComment(postId, tabName, e.target);
                 }
-                // Shift 없이 Enter면 기본 동작(줄바꿈) 유지
+                return;
             }
+            // 데스크톱: Shift+Enter 전송, Enter만 누르면 줄바꿈
+            if (e.shiftKey) {
+                e.preventDefault();
+                const postId = e.target.dataset.postId;
+                const tabName = e.target.dataset.tab;
+                if (postId && tabName) {
+                    await addComment(postId, tabName, e.target);
+                }
+                return;
+            }
+            e.preventDefault();
+            const ta = e.target;
+            const start = ta.selectionStart;
+            const end = ta.selectionEnd;
+            const val = ta.value;
+            ta.value = val.slice(0, start) + '\n' + val.slice(end);
+            ta.selectionStart = ta.selectionEnd = start + 1;
         });
         
         // 별가루 효과
