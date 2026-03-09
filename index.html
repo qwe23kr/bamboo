@@ -2760,7 +2760,7 @@
                         var m = post.media[i];
                         var itemStyle = 'flex:0 0 ' + itemPct + '%;width:' + itemPct + '%;min-width:' + itemPct + '%;';
                         if (m.type === 'video') {
-                            sliderHTML += '<div class="post-media-slider-item daily-detail-slide-item" style="' + itemStyle + '"><video controls><source src="' + m.url + '" type="video/mp4"></video></div>';
+                            sliderHTML += '<div class="post-media-slider-item daily-detail-slide-item" style="' + itemStyle + '"><video controls src="' + m.url + '"></video></div>';
                         } else {
                             sliderHTML += '<div class="post-media-slider-item daily-detail-slide-item" style="' + itemStyle + '"><img src="' + m.url + '" alt="이미지 ' + (i + 1) + '" loading="lazy" decoding="async" data-download-url="' + m.url + '" data-download-name="image-' + (i + 1) + '.jpg"></div>';
                         }
@@ -2787,7 +2787,7 @@
                     var wrap = document.createElement('div');
                     wrap.className = 'daily-detail-media-item';
                     if (m.type === 'video') {
-                        wrap.innerHTML = '<video controls><source src="' + m.url + '" type="video/mp4"></video>';
+                        wrap.innerHTML = '<video controls src="' + m.url + '"></video>';
                     } else {
                         var img = document.createElement('img');
                         img.src = m.url;
@@ -2930,7 +2930,7 @@
             if (post.media && post.media.length > 0) {
                 if (post.media.length === 1) {
                     if (post.media[0].type === 'video') {
-                        mediaHTML = `<div class="post-media"><video controls><source src="${post.media[0].url}" type="video/mp4"></video></div>`;
+                        mediaHTML = `<div class="post-media"><video controls src="${post.media[0].url}"></video></div>`;
                     } else {
                         mediaHTML = `<div class="post-media"><img src="${post.media[0].url}" alt="이미지" loading="lazy" decoding="async"></div>`;
                     }
@@ -2945,7 +2945,7 @@
                     post.media.forEach((media, index) => {
                         var itemStyle = 'flex:0 0 ' + itemPct + '%;width:' + itemPct + '%;min-width:' + itemPct + '%;';
                         if (media.type === 'video') {
-                            mediaHTML += '<div class="post-media-slider-item" style="' + itemStyle + '"><video controls><source src="' + media.url + '" type="video/mp4"></video></div>';
+                            mediaHTML += '<div class="post-media-slider-item" style="' + itemStyle + '"><video controls src="' + media.url + '"></video></div>';
                         } else {
                             mediaHTML += '<div class="post-media-slider-item" style="' + itemStyle + '"><img src="' + media.url + '" alt="이미지 ' + (index + 1) + '" loading="lazy" decoding="async"></div>';
                         }
@@ -3899,11 +3899,14 @@ const img = new Image();
                     const uploadPromises = window.selectedMedia.map(async (media, i) => {
                         const uuid = generateUUID();
                         const random = Math.random().toString(36).substring(2, 15);
-                        const fileName = `${uuid}_${Date.now()}_${random}.${media.type === 'image' ? 'jpg' : 'mp4'}`;
+                        const ext = media.type === 'image'
+                            ? (media.file.type === 'image/png' ? 'png' : 'jpg')
+                            : (media.file.type && media.file.type.indexOf('webm') >= 0 ? 'webm' : 'mp4');
+                        const fileName = `${uuid}_${Date.now()}_${random}.${ext}`;
                         const mediaStorageRef = storageRef(storage, `daily/${postId}/${fileName}`);
-                        
+                        const metadata = { contentType: media.file.type || (media.type === 'image' ? 'image/jpeg' : 'video/mp4') };
                         try {
-                            await uploadBytes(mediaStorageRef, media.file);
+                            await uploadBytes(mediaStorageRef, media.file, metadata);
                             const downloadURL = await getDownloadURL(mediaStorageRef);
                             
                             const completed = i + 1;
