@@ -733,6 +733,15 @@
             word-break: break-word;
         }
         
+        .content-link {
+            color: #1a73e8;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+        .content-link:hover {
+            color: #1557b0;
+        }
+        
         .comments-section {
             margin-top: 20px;
             padding-top: 20px;
@@ -2753,7 +2762,7 @@
             var date = new Date(post.createdAt);
             var dateStr = formatDetailDate(date);
             setDetailHeader(titleEl, post.author, dateStr);
-            contentEl.textContent = post.content || '';
+            contentEl.innerHTML = formatContentForDisplay(post.content || '');
             contentEl.style.display = post.content ? 'block' : 'none';
             mediaEl.innerHTML = '';
             mediaEl.style.display = '';
@@ -2886,7 +2895,7 @@
             var date = new Date(post.createdAt);
             var dateStr = formatDetailDate(date);
             setDetailHeader(titleEl, post.author, dateStr);
-            contentEl.textContent = post.content || '';
+            contentEl.innerHTML = formatContentForDisplay(post.content || '');
             contentEl.style.display = 'block';
             mediaEl.innerHTML = '';
             mediaEl.style.display = 'none';
@@ -2900,17 +2909,26 @@
             modal.classList.add('show');
         };
         
-        // 줄바꿈·띄어쓰기 보존 (모바일 포함) — HTML 이스케이프 후 \n을 <br>로
+        // 줄바꿈·띄어쓰기 보존 + URL 링크화 (HTML 이스케이프 후 \n→<br>, http(s) URL→클릭 가능 링크)
         function formatContentForDisplay(text) {
             if (text == null || text === '') return '';
             var s = String(text);
-            return s
+            s = s
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
                 .replace(/\r\n/g, '<br>')
                 .replace(/\n/g, '<br>')
                 .replace(/\r/g, '<br>');
+            // http://, https:// URL을 클릭 가능 링크로 (끝의 .,;:!?) 제외)
+            s = s.replace(/(https?:\/\/[^\s<>&"']+)/g, function(match) {
+                var trimmed = match.replace(/[.,;:!?)]+$/, '');
+                var href = trimmed.replace(/&amp;/g, '&');
+                if (!/^https?:\/\//i.test(href)) return match;
+                var safeHref = href.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return '<a href="' + safeHref + '" target="_blank" rel="noopener noreferrer" class="content-link">' + trimmed + '</a>' + (match.slice(trimmed.length));
+            });
+            return s;
         }
         
         // 글 요소 생성
