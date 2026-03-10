@@ -335,7 +335,14 @@
         .media-upload-area {
             margin-bottom: 15px;
         }
-        
+        .media-upload-btns {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .media-upload-btns .upload-btn {
+            flex: 1;
+        }
         .upload-btn {
             display: inline-block;
             padding: 15px 25px;
@@ -1506,6 +1513,32 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
         
+        #writeModal .modal-content {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #writeModal .write-form {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        #writeModal .write-form-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        #writeModal .write-form-submit {
+            flex-shrink: 0;
+            position: relative;
+            z-index: 5;
+            touch-action: manipulation;
+            min-height: 48px;
+            cursor: pointer;
+        }
+        
         .modal-title {
             font-family: 'Yanolja', sans-serif;
             font-size: 1.8em;
@@ -2031,6 +2064,7 @@
                 <input type="hidden" id="editPostId" value="">
                 <input type="hidden" id="editTabName" value="">
                 
+                <div class="write-form-scroll">
                 <!-- 칭찬/민원일 때만: 타입 선택 -->
                 <div id="praiseComplaintTypeSection" class="write-form-row" style="display: none;">
                     <label class="write-form-label">유형</label>
@@ -2053,13 +2087,17 @@
                 <!-- 일상로그일 때만 미디어 업로드 표시 -->
                 <div id="mediaUploadSection" class="media-upload-area" style="display: none;">
                     <input type="file" id="mediaInput" accept="image/*,video/*" multiple style="display: none;" onchange="handleMediaSelect(event)">
-                    <label for="mediaInput" class="upload-btn">
-                        <span>📷 사진/영상 추가</span>
-                    </label>
+                    <input type="file" id="mediaInputImage" accept="image/*" multiple style="display: none;" onchange="handleMediaSelect(event)">
+                    <input type="file" id="mediaInputVideo" accept="video/*" multiple style="display: none;" onchange="handleMediaSelect(event)">
+                    <div class="media-upload-btns">
+                        <label for="mediaInputImage" class="upload-btn">📷 사진</label>
+                        <label for="mediaInputVideo" class="upload-btn">🎬 영상</label>
+                    </div>
                     <div id="mediaPreview" class="media-preview"></div>
                 </div>
+                </div>
                 
-                <button type="submit" class="btn btn-pink" id="writeSubmitBtn">작성하기</button>
+                <button type="submit" class="btn btn-pink write-form-submit" id="writeSubmitBtn">작성하기</button>
             </form>
         </div>
     </div>
@@ -3862,93 +3900,67 @@ const img = new Image();
             });
         }
         
-        // 미디어 선택 처리
+        // 미디어 선택 처리 (사진·영상 함께 선택 가능, 기존 목록에 추가)
         window.handleMediaSelect = async function(event) {
             try {
-                const files = Array.from(event.target.files);
+                const files = Array.from(event.target.files || []);
                 const preview = document.getElementById('mediaPreview');
+                if (!preview) return;
+                if (files.length === 0) return;
                 
-                if (!preview) {
-                    return;
-                }
-                
-                preview.innerHTML = '';
-                
-                if (files.length === 0) {
-                    return;
-                }
-                
-                window.selectedMedia = [];
+                if (!window.selectedMedia) window.selectedMedia = [];
                 
                 for (const file of files) {
                     const isImage = file.type.startsWith('image/');
                     const isVideo = file.type.startsWith('video/');
-                    
                     if (!isImage && !isVideo) {
                         alert(`${file.name}은(는) 지원하지 않는 파일 형식입니다.`);
                         continue;
                     }
-                    
-                    // 파일 크기 체크 (100MB 제한)
-                    const maxSize = 100 * 1024 * 1024; // 100MB
+                    const maxSize = 100 * 1024 * 1024;
                     if (file.size > maxSize) {
                         alert(`${file.name}의 크기가 너무 큽니다. (최대 100MB)`);
                         continue;
                     }
-                    
                     let processedFile = file;
                     let previewUrl = URL.createObjectURL(file);
-                    
-                    // 이미지인 경우 압축 (300KB 이상이면 압축)
                     if (isImage && file.size > 300 * 1024) {
                         try {
                             processedFile = await compressImage(file);
-                            URL.revokeObjectURL(previewUrl); // 이전 URL 해제
+                            URL.revokeObjectURL(previewUrl);
                             previewUrl = URL.createObjectURL(processedFile);
-                        } catch (compressError) {
-                            // 압축 실패 시 원본 파일 사용
-                            console.warn('이미지 압축 실패:', compressError);
-                        }
+                        } catch (e) { console.warn('이미지 압축 실패:', e); }
                     }
-                    
-                    // 동영상인 경우 압축 (10MB 이상이면 압축 시도)
                     if (isVideo && file.size > 10 * 1024 * 1024) {
                         try {
-                            // 동영상 압축은 시간이 걸릴 수 있으므로 사용자에게 알림
                             const compressedVideo = await compressVideo(file);
                             if (compressedVideo && compressedVideo.size < file.size) {
                                 URL.revokeObjectURL(previewUrl);
                                 processedFile = compressedVideo;
                                 previewUrl = URL.createObjectURL(processedFile);
                             }
-                        } catch (compressError) {
-                            // 압축 실패 시 원본 파일 사용
-                            console.warn('동영상 압축 실패:', compressError);
-                        }
+                        } catch (e) { console.warn('동영상 압축 실패:', e); }
                     }
-                    
                     window.selectedMedia.push({
                         file: processedFile,
                         type: isImage ? 'image' : 'video',
                         previewUrl: previewUrl,
                         originalName: file.name
                     });
-                    
-                    // 미리보기 추가
-                    const mediaItem = document.createElement('div');
-                    mediaItem.className = 'media-item';
-                    
-                    if (isImage) {
-                        mediaItem.innerHTML = `<img src="${previewUrl}" alt="미리보기"><button class="remove-btn" onclick="removeMedia(${window.selectedMedia.length - 1})">×</button>`;
-                    } else {
-                        mediaItem.innerHTML = `<video src="${previewUrl}" controls></video><button class="remove-btn" onclick="removeMedia(${window.selectedMedia.length - 1})">×</button>`;
-                    }
-                    
-                    preview.appendChild(mediaItem);
                 }
                 
-                if (window.selectedMedia.length > 0) {
-                }
+                event.target.value = '';
+                preview.innerHTML = '';
+                window.selectedMedia.forEach(function(media, idx) {
+                    var mediaItem = document.createElement('div');
+                    mediaItem.className = 'media-item';
+                    if (media.type === 'image') {
+                        mediaItem.innerHTML = '<img src="' + media.previewUrl + '" alt="미리보기"><button class="remove-btn" onclick="removeMedia(' + idx + ')">×</button>';
+                    } else {
+                        mediaItem.innerHTML = '<video src="' + media.previewUrl + '" controls></video><button class="remove-btn" onclick="removeMedia(' + idx + ')">×</button>';
+                    }
+                    preview.appendChild(mediaItem);
+                });
             } catch (error) {
                 alert('파일 선택 중 오류가 발생했습니다: ' + error.message);
             }
